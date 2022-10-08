@@ -13,7 +13,7 @@ String.prototype.podstaw = function (data) {
     let text = this.toString()
 
     Object.keys(data).forEach(e => {
-        text = text.replace(`{${e}}`, data[e])
+        text = text.replaceAll(`{${e}}`, data[e])
     });
     return text
 }
