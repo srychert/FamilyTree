@@ -1,6 +1,7 @@
 {
   "name": "mastermind",
   "version": "0.1.0",
+  "type": "module",
   "description": "TCP-based Mastermind Game",
   "main": "app.js",
   "private": true,

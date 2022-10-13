@@ -1,62 +1,58 @@
 // moduł TCP – jako „podstawa serwera aplikacji”
-const net = require("net");
-const getGameOptions = require("./getGameOptions");
+import { createServer } from "net";
+
+import { getGameOptions } from "./getGameOptions.js";
+import { confiugreGame } from "./configureGame.js";
+import { game, generateSequence } from "./game.js";
 
 // parametr – ewentualnie przekazywany poprzez zmienną środowiskową
 const port = process.env.PORT || 3000;
 
-// tworzymy i konfigurujemy obiekt aplikacji
-const app = net.createServer();
+// tworzymy obiekt aplikacji
+const app = createServer();
 
+// implementacja gry
 app.on('connection', (socket) => {
-    socket.onGoing = false
     socket.optionsConfigured = false
+    socket.gameGenerated = false
+    socket.onGoing = false
 
     socket.write("Specify game options (leave blank for defaults eg. 5,,10)\n")
-    const gameOptions = getGameOptions()
-    socket.write(`Size[${gameOptions.size}], Dimension[${gameOptions.dimension}], Maximum[${gameOptions.maximum}]: `)
+    let gameOptions = getGameOptions();
+    let gameSequence;
+    socket.write(`Size[${gameOptions.size}],Dimension[${gameOptions.dimension}],Maximum[${gameOptions.maximum}]: `)
 
-    // implementacja gry
     socket.on('data', (data) => {
-        msg = data.toString().replace('\n', '')
+        let msg = data.toString().replace('\n', '')
 
+        // polecenia wczesnego zakończenia gry
+        if (msg.toLowerCase() === 'stop') {
+            socket.write("Game stopped")
+            socket.destroy()
+        }
+
+        // gracz dostosowuje ustawienia gry
         if (!socket.optionsConfigured) {
-
-            (function () {
-                if (msg === '') {
-                    socket.optionsConfigured = true
-                    return
-                }
-
-                options = msg.split(',')
-
-                if (options.length !== 3) {
-                    socket.write('wrong format\n')
-                    return
-                }
-
-                try {
-                    optionsList = options.map(option => parseInt(option.trim()))
-                } catch {
-                    socket.write('wrong options data')
-                    return
-                }
-
-                gameOptions.size = isNaN(optionsList[0]) ? gameOptions.size : optionsList[0]
-                gameOptions.dimension = isNaN(optionsList[1]) ? gameOptions.dimension : optionsList[1]
-                gameOptions.maximum = isNaN(optionsList[2]) ? gameOptions.maximum : optionsList[2]
-                socket.optionsConfigured = true
-            })();
+            let newGameOptions = confiugreGame(socket, gameOptions, msg)
+            if (!newGameOptions) {
+                return
+            }
+            gameOptions = newGameOptions
+            socket.write("Game configured!\n")
         }
 
-        if (socket.optionsConfigured) {
+        // Po skonfigurowaniu generujemy gre oraz ustawiamy jako trwającą
+        if (socket.optionsConfigured && !gameSequence) {
             console.log(gameOptions)
+            gameSequence = generateSequence(gameOptions)
             socket.onGoing = true
+            socket.write("The game has started, guess with integers separated by a space\n")
+            return
         }
 
+        // logika gry
         if (socket.onGoing) {
-            // game logic here
-            console.log(gameOptions)
+            game(socket, gameOptions, msg, gameSequence)
         }
     })
 })

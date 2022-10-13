@@ -1,11 +1,5 @@
-const gameOptions = (size = 10, dimension = 10, maximum = 0) => {
-    // colors = [...Array(d).keys()]
-
-    return {
-        size,
-        dimension,
-        maximum
-    }
-}
-
-module.exports = gameOptions
+export const getGameOptions = (size = 5, dimension = 10, maximum = 0) => ({
+    size,
+    dimension,
+    maximum
+})
