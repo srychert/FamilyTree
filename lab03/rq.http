@@ -1,0 +1,29 @@
+GET http://localhost:3000 HTTP/1.1
+
+###
+
+POST http://localhost:3000/mmind HTTP/1.1
+content-type: application/json
+
+{
+    "size": 5,
+    "dim": 10
+}
+
+###
+
+POST http://localhost:3000/mmind HTTP/1.1
+content-type: application/json
+
+{
+    "size": 5,
+    "dim": 10,
+    "max": 1
+}
+
+###
+
+PATCH http://localhost:3000/mmind HTTP/1.1
+content-type: application/json
+
+["11816a43-877d-4e6c-9c14-2113cefdda6f", 1, 9, 0, 6, 0]
