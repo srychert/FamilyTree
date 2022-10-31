@@ -2,7 +2,7 @@ export const generateSequence = (gameOptions) => {
     let colors = [...Array(gameOptions.dim).keys()]
     let gameSequence = []
     for (let i = 0; i < gameOptions.size; i++) {
-        var randomColor = colors[Math.floor(Math.random() * colors.length)];
+        let randomColor = colors[Math.floor(Math.random() * colors.length)];
         gameSequence.push(randomColor)
     }
 
@@ -10,39 +10,45 @@ export const generateSequence = (gameOptions) => {
     return gameSequence
 }
 
-export const game = (gameOptions, guess) => {
+export const getScore = (gameOptions, guess) => {
     const gameSequence = gameOptions.seq
-    let response = { 'gameid': gameOptions.gameid, 'black': 0, 'white': 0 }
 
-    let checkedForBlackGuess = []
-    let checkedForBlackGame = []
+    let score = {
+        "black": 0,
+        "white": 0
+    }
 
-    guess.forEach((g, index) => {
-        if (g != gameSequence[index]) {
-            checkedForBlackGuess.push(g)
-            checkedForBlackGame.push(gameSequence[index])
-        }
-    })
+    // numbers from guess that are not marked as black
+    let checkedForBlackGuess = guess.filter((number, index) => number !== gameSequence[index])
+    // numbers form game that are left over after checking for black
+    let checkedForBlackGame = gameSequence.filter((number, index) => number !== guess[index])
 
-    response.black = gameOptions.size - checkedForBlackGame.length
+    score.black = gameOptions.size - checkedForBlackGame.length
 
     checkedForBlackGuess.forEach(g => {
         let i = checkedForBlackGame.indexOf(parseInt(g))
         if (i !== -1) {
             checkedForBlackGame.splice(i, 1)
-            response.white += 1
+            score.white += 1
         }
     })
 
-    if (response.black === gameOptions.size) {
-        response.msg = "You won!"
+    return score
+}
+
+export const generateResponse = (gameOptions, score) => {
+    let response = { 'gameid': gameOptions.gameid, score }
+
+    if (response.score.black === gameOptions.size) {
+        response.won = "You won!"
+        return response
     }
 
     if (gameOptions.turnsLeft) {
         gameOptions.turnsLeft -= 1
 
         if (gameOptions.turnsLeft === 0) {
-            response.lost = `You lost! The sequence was ${gameSequence}`
+            response.lost = `You lost! The sequence was ${gameOptions.seq}`
         }
 
         response.turns = `Turns left: ${gameOptions.turnsLeft}`
