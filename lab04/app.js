@@ -9,12 +9,27 @@ app.use(express.json())
 
 let games = [];
 
+app.use(express.static('public'))
+
 // Make new game
 app.post('/mmind', (req, res) => {
     // max of 0 means unlimited tries
-    const { size, dim, max = 0 } = req.body
+    let { size, dim, max = 0 } = req.body
     if (!size || !dim) {
         res.status(400).send({ "err": "Wrong request - size or dim missing" })
+        return
+    }
+
+    size = parseInt(size)
+    dim = parseInt(dim)
+    max = parseInt(max)
+
+    if (isNaN(max)) {
+        max = 0
+    }
+
+    if (isNaN(size) || isNaN(dim)) {
+        res.status(400).send({ "err": "Wrong request - size or dim is not an integer" })
         return
     }
 
