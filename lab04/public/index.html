@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script defer src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+    <script defer src="script.js"></script>
+    <title>MasterMind</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="game-container">
+            <h2 id="status-new-game"></h2>
+            <h1>Master Mind</h1>
+            <form id="new-game-form">
+                <div class="form-row">
+                    <label for="size">Size:</label>
+                    <input type="number" id="size" name="size" min="1" step="1" placeholder="5">
+                </div>
+                <div class="form-row">
+                    <label for="dim">Dim:</label>
+                    <input type="number" id="dim" name="dim" min="1" step="1" placeholder="10">
+                </div>
+                <div class="form-row">
+                    <label for="max">Max:</label>
+                    <input type="number" id="max" name="max" min="0" step="1" value="0">
+                </div>
+                <input type="submit" value="Start new game">
+            </form>
+            <h2 id="status-game"></h2>
+            <form id="game-form">
+                <div class="form-row">
+                    <label for="game-id">Game ID:</label>
+                    <input type="text" id="game-id" name="game-id" placeholder="11816a43-877d-4e6c-9c14-2113cefdda6f">
+                </div>
+                <div class="form-row">
+                    <label for="guess">Guess</label>
+                    <input type="text" id="guess" name="guess" placeholder="1,9,0,6,0">
+                </div>
+                <input type="submit" value="Take guess">
+            </form>
+            <ul id="scores">
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>
