@@ -76,6 +76,11 @@ app.patch('/mmind', (req, res) => {
         return
     }
 
+    if (!userGuess.every(g => Number.isInteger(g))) {
+        res.status(400).send({ "err": `Wrong request - guess should contain only integers` })
+        return
+    }
+
     const score = getScore(gameOptions[0], userGuess)
     const response = generateResponse(gameOptions[0], score)
 

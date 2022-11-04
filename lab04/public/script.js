@@ -9,6 +9,7 @@ const scores = document.getElementById("scores")
 
 newGameForm.addEventListener("submit", (e) => {
     e.preventDefault()
+    scores.innerHTML = "";
     const data = new FormData(newGameForm);
 
     const newGameRequest = {}
@@ -41,7 +42,7 @@ gameForm.addEventListener("submit", (e) => {
         console.log(name, ":", value)
         if (name === "guess") {
             guess = value
-            reqArr.push(...value.split(",").map(v => v.trim()))
+            reqArr.push(...value.split(",").map(v => parseInt(v.trim())))
         } else {
             reqArr.push(value)
         }
@@ -50,10 +51,18 @@ gameForm.addEventListener("submit", (e) => {
     axios.patch("/mmind", reqArr)
         .then(r => {
             statusTextGame.textContent = "";
-            const { score } = r.data
+            const { score, lost, won } = r.data
             const li = document.createElement("li");
             li.innerText = `Guess: ${guess} Black: ${score.black} White: ${score.white}`
             scores.appendChild(li);
+
+            if (lost) {
+                alert(lost)
+            }
+
+            if (won) {
+                alert(won)
+            }
         })
         .catch(err => {
             console.log(err)

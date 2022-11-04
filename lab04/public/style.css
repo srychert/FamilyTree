@@ -38,10 +38,16 @@ h1 {
     color: var(--text);
 }
 
+h2{
+    display: block;
+    width: 260px;
+}
+
 form {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    width: 260px;
 }
 
 .form-row {
