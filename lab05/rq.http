@@ -2,9 +2,9 @@ POST http://localhost:3000/users HTTP/1.1
 content-type: application/json
 
 {
-	"login": "seba",
-	"email": "seba@example.com",
-	"registrationDate": "10/11/2022"
+	"login": "some long login here",
+	"email": "some_long_login_here@example.com",
+	"registrationDate": "01/09/2022"
 }
 
 #######

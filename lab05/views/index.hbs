@@ -1,0 +1,16 @@
+<div class="users-list">
+    <div class="users-list-general users-list-header">
+        <div>Login</div>
+        <div>Email</div>
+        <div>Registration</div>
+    </div>
+    <div class="users-list-users">
+        {{#each users}}
+            <div class="users-list-general users-list-item">
+                <div>{{this.login}}</div>
+                <div>{{this.email}}</div>
+                <div>{{formatDate this.registrationDate }}</div>
+            </div>
+        {{/each}}
+    </div>
+</div>
