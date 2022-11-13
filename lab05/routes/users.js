@@ -5,8 +5,7 @@ const User = require('../models/User');
 
 // Pobranie danych wszystkich użytkowników
 router.get('/', async (req, res) => {
-
-    try {
+	try {
 		const users = await User.find({});
 		return res.send(users);
 	} catch (e) {
@@ -17,8 +16,8 @@ router.get('/', async (req, res) => {
 
 // Utworzenie nowego użytkownika
 router.post('/', async (req, res) => {
-    const { login, email, registrationDate } = req.body;
 	try {
+		const { login, email, registrationDate } = req.body;
 		const user = await User.create({
 			login,
 			email,
@@ -33,7 +32,7 @@ router.post('/', async (req, res) => {
 
 // Pobranie danych użytkownika o podanym userId
 router.get('/:userId', async (req, res) => {
-    try {
+	try {
 		const user = await User.findById(req.params.userId);
 		return res.send(user);
 	} catch (e) {
@@ -45,7 +44,7 @@ router.get('/:userId', async (req, res) => {
 
 // Zastąpienie danych użytkownika o podanym userId nowym „kompletem”
 router.put('/:userId', async (req, res) => {
-    try {
+	try {
 		const id = req.params.userId;
 		const { login, email, registrationDate } = req.body;
 		const fields = {
@@ -68,7 +67,7 @@ router.put('/:userId', async (req, res) => {
 
 // Usuniecie użytkownika o podanym userId
 router.delete('/:userId', async (req, res) => {
-    try {
+	try {
 		const id = req.params.userId;
 		const user = await User.findByIdAndDelete(id);
 		return res.send(user);
@@ -80,7 +79,7 @@ router.delete('/:userId', async (req, res) => {
 
 // „Unacześnienie” wybranych danych użytkownika o podanym userId
 router.patch('/:userId', async (req, res) => {
-    try {
+	try {
 		const id = req.params.userId;
 		const { login, email, registrationDate } = req.body;
 		const fields = {

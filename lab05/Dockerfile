@@ -10,4 +10,4 @@ RUN mkdir -p node_modules/.cache && chmod -R 777 node_modules/.cache
 
 COPY . .
 
-CMD ["node", "serwer.js"]
+CMD ["npm", "run", "start"]

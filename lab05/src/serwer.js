@@ -4,12 +4,21 @@ const handlebars = require('express-handlebars');
 const path = require('path');
 const axios = require('axios');
 
+const sass = require("node-sass-middleware");
+
+app.use(sass({
+    src: path.join(__dirname),
+    dest: path.join(__dirname, "..", "public"),
+    debug: true,
+    outputStyle: "compressed",
+}));
+
 app.use(express.json());
-app.use(express.static('public'))
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 // Dodajemy usługi REST, które należy zdefiniować w pliku „users.js”
 // znajdującym się w podkatalogu „routes”
-const users = require('./routes/users');
+const users = require('../routes/users');
 app.use('/users', users);
 
 require('dotenv').config();
@@ -27,7 +36,8 @@ const hbs = handlebars.create({
 //Sets handlebars configurations (we will go through them later on)
 app.engine('.hbs', hbs.engine);
 app.set('view engine', '.hbs');
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, "..", 'views'));
+
 
 app.get('/', async (req, res) => {
     const users = await axios.get(`http://${apiHost}:${apiPort}/users`).then(r => r.data).catch(e => console.log(e))

@@ -1,16 +1,10 @@
-<div class="users-list">
-    <div class="users-list-general users-list-header">
-        <div>Login</div>
-        <div>Email</div>
-        <div>Registration</div>
-    </div>
-    <div class="users-list-users">
-        {{#each users}}
-            <div class="users-list-general users-list-item">
-                <div>{{this.login}}</div>
-                <div>{{this.email}}</div>
-                <div>{{formatDate this.registrationDate }}</div>
-            </div>
-        {{/each}}
-    </div>
+<h1>Users:</h1>
+<div class="users">
+    {{#each users}}
+        <div class="card">
+            <div class="card-text">{{this.login}}</div>
+            <div class="card-text">{{this.email}}</div>
+            <div class="">{{formatDate this.registrationDate }}</div>
+        </div>
+    {{/each}}
 </div>
