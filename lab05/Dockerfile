@@ -1,12 +1,13 @@
-FROM node
+FROM node:alpine
+
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /opt/app
 
 COPY ./package.json ./
 
-RUN apt-get update || : && apt-get install python -y
-
-RUN yarn install
+RUN yarn install --production
 
 RUN mkdir -p node_modules/.cache && chmod -R 777 node_modules/.cache
 

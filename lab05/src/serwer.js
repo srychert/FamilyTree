@@ -4,14 +4,15 @@ const handlebars = require('express-handlebars');
 const path = require('path');
 const axios = require('axios');
 
-const sass = require("node-sass-middleware");
-
-app.use(sass({
-    src: path.join(__dirname),
-    dest: path.join(__dirname, "..", "public"),
-    debug: true,
-    outputStyle: "compressed",
-}));
+if (process.env.NODE_ENV !== 'production') {
+    const sass = require("node-sass-middleware");
+    app.use(sass({
+        src: path.join(__dirname),
+        dest: path.join(__dirname, "..", "public"),
+        debug: true,
+        outputStyle: "compressed",
+    }));
+}
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
