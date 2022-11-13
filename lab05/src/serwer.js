@@ -46,6 +46,18 @@ app.get('/', async (req, res) => {
     });
 });
 
+app.get('/new-user', async (req, res) => {
+    res.render('new');
+})
+
+app.get('/user/:id', async (req, res) => {
+    const id = req.params.id;
+    const user = await axios.get(`http://${apiHost}:${apiPort}/users/${id}`).then(r => r.data).catch(e => console.log(e))
+    res.render('user', {
+        user
+    });
+})
+
 const dbConnData = {
     host: process.env.MONGO_HOST || '127.0.0.1',
     port: process.env.MONGO_PORT || 27017,
