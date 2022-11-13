@@ -1,8 +1,10 @@
-FROM node:alpine
+FROM node
 
 WORKDIR /opt/app
 
 COPY ./package.json ./
+
+RUN apt-get update || : && apt-get install python -y
 
 RUN yarn install
 
