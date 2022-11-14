@@ -28,3 +28,15 @@
 .home {
     position: absolute;
 }
+
+.delete {
+    background-color: var(--accent);
+}
+
+.delete:focus {
+    box-shadow: 0 0 0 0.125rem var(--primary);
+}
+
+.update {
+    background-color: var(--primary);
+}

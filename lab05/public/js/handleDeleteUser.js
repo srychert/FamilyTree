@@ -1,8 +1,7 @@
-const button = document.getElementById("delete");
-const id = document.getElementById("id").value;
+const deleteButton = document.getElementById("delete");
 
-button.addEventListener('click', (e) => {
-    axios.delete(`/users/${id}`)
+deleteButton.addEventListener('click', (e) => {
+    axios.delete(`/users/${document.getElementById("id").value}`)
         .then(r => {
             console.log(r)
             window.location.pathname = "/"
