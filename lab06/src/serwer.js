@@ -5,17 +5,76 @@ const path = require('path');
 const axios = require('axios');
 
 if (process.env.NODE_ENV !== 'production') {
-    const sass = require("node-sass-middleware");
-    app.use(sass({
-        src: path.join(__dirname),
-        dest: path.join(__dirname, "..", "public"),
-        debug: true,
-        outputStyle: "compressed",
-    }));
+    // const sass = require("node-sass-middleware");
+    // app.use(sass({
+    //     src: path.join(__dirname),
+    //     dest: path.join(__dirname, "..", "public"),
+    //     debug: true,
+    //     outputStyle: "compressed",
+    // }));
 }
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
+
+app.use(require('body-parser').urlencoded({
+    extended: false
+}));
+
+app.use(require('express-session')({
+    secret: "secret",
+    resave: false,
+    saveUninitialized: false
+}));
+
+const User = require('../models/User');
+
+const passport = require('passport');
+const passportLocal = require('passport-local');
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Konfiguracja Passport.js
+const validateUser = (login, password, done) => {
+    User.findOne({login: login}, (err, user) => {
+        if (err) {
+            done(err);
+        }
+        if (user) {
+            // if (user.password === HASH(password)) {
+            // dla ułatwienia hasła będą w „plain text” (nie używać „produkcyjnie”!)
+            if (user.password === password) {
+                done(null, user);
+            } else {
+                done(null, null);
+            }
+        } else {
+            done(null, null);
+        }
+    });
+};
+// instalujemy dwa „middleware" Passport.js
+passport.use(new passportLocal.Strategy(validateUser));
+
+passport.serializeUser( (user, done) => done(null, user.id) );
+passport.deserializeUser( (id, done) => {
+    User.findOne({"_id": id}, (err, user) => {
+        if (err) {
+            done(err);
+        }
+        if (user) {
+            done(null, {
+                id: user._id,
+                login: user.login,
+                password: user.password
+            });
+        } else {
+            done({
+                msg: 'Nieznany ID'
+            });
+        }
+    });
+});
 
 // Dodajemy usługi REST, które należy zdefiniować w pliku „users.js”
 // znajdującym się w podkatalogu „routes”
@@ -39,6 +98,16 @@ app.engine('.hbs', hbs.engine);
 app.set('view engine', '.hbs');
 app.set('views', path.join(__dirname, "..", 'views'));
 
+app.get('/login', (_req, res) => res.render('login') );
+
+app.post('/login', passport.authenticate('local', { failureRedirect: '/login', failureMessage: true }), (_req, res) => res.redirect('/') );
+
+app.get('/logout', (req, res, next) => {
+    req.logout( (err) => {
+        if (err) { return next(err); }
+        res.redirect('/');
+    });
+});
 
 app.get('/', async (req, res) => {
     const users = await axios.get(`http://${apiHost}:${apiPort}/users`).then(r => r.data).catch(e => console.log(e))
@@ -48,7 +117,12 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/new-user', async (req, res) => {
-    res.render('new');
+    console.log(req.user)
+    console.log(req.isAuthenticated())
+    res.render('new', {
+        isAuthenticated: req.isAuthenticated(),
+        user: req.user
+    });
 })
 
 app.get('/user/:id', async (req, res) => {

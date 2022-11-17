@@ -1,5 +1,6 @@
 const form = document.getElementById("add-user-form");
 const login = form.elements['login'];
+const password = form.elements['password'];
 const email = form.elements['email'];
 
 form.addEventListener('submit', (e) => {
@@ -8,6 +9,7 @@ form.addEventListener('submit', (e) => {
 
     axios.post("/users", {
         login: login.value,
+        password: password.value,
         email: email.value,
         registrationDate: new Date()
     })
