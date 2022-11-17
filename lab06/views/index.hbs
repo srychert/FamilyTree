@@ -1,0 +1,10 @@
+<h1>Users:</h1>
+<div class="users">
+    {{#each users}}
+        <div onclick="window.location.pathname = '/user/{{this._id}}'" class="card">
+            <div class="card-text">{{this.login}}</div>
+            <div class="card-text">{{this.email}}</div>
+            <div class="card-text">{{formatDate this.registrationDate }}</div>
+        </div>
+    {{/each}}
+</div>
