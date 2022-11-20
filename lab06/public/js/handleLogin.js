@@ -1,21 +1,17 @@
-const form = document.getElementById("add-user-form");
+const form = document.getElementById("login-form");
 const login = form.elements['login'];
 const password = form.elements['password'];
-const email = form.elements['email'];
 
 form.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    axios.post("/users", {
+    axios.post("/login", {
         login: login.value,
-        password: password.value,
-        email: email.value,
-        registrationDate: new Date()
+        password: password.value
     })
         .then(r => {
             console.log(r)
             window.location.pathname = "/"
         })
         .catch(e => console.log(e))
-
 })
