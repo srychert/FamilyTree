@@ -17,6 +17,11 @@ const userSchema = new Schema({
         unique: true
     },
     registrationDate: Date,
+    role: {
+        type: String,
+        required: true,
+        enum: ['ADMIN', 'USER']
+    }
 });
 
 module.exports = model('User', userSchema);

@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const handlebars = require('express-handlebars');
 const path = require('path');
-const sassConfig = require("./sassConfig").use(app);
+// const sassConfig = require("./sassConfig").use(app);
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
@@ -46,11 +46,11 @@ app.get('/login', (_req, res) => res.render('login'));
 
 app.post('/login', passport.authenticate('json', { failWithError: true }),
     // handle error
-    function (err, req, res, next) {
+    function (_err, _req, res, _next) {
         return res.status(401).send();
     },
-    function (req, res, next) {
-        return res.status(200).send();
+    function (req, res, _next) {
+        return res.status(200).send({ id: req.user._id });
     },
 );
 

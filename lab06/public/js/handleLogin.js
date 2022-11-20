@@ -11,7 +11,7 @@ form.addEventListener('submit', (e) => {
     })
         .then(r => {
             console.log(r)
-            window.location.pathname = "/"
+            window.location.pathname = "/user/" + r.data.id
         })
         .catch(e => console.log(e))
 })
