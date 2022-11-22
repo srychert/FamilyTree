@@ -1,0 +1,9 @@
+<div class="buttons">
+    <button class="button home" onclick="window.location.pathname = '/'">Home</button>
+    <button class="button add-user" onclick="window.location.pathname = '/new'">Add user</button>
+    {{#if loggedIn}}
+    <button class="button logout" onclick="window.location.pathname = '/logout'">Logout</button>
+    {{else}}
+    <button class="button login" onclick="window.location.pathname = '/login'">Login</button>
+    {{/if}}
+</div>
