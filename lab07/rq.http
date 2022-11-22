@@ -37,3 +37,6 @@ content-type: application/json
 	"email": "seba2@example.com",
 	"registrationDate": "11/11/2022"
 }
+
+#######
+DELETE http://localhost:3000/users/637c80784d05e202cef3d73a HTTP/1.1

@@ -1,8 +1,11 @@
 const express = require('express');
 const app = express();
+const cors = require('cors')
 const handlebars = require('express-handlebars');
 const path = require('path');
 // const sassConfig = require("./sassConfig").use(app);
+
+app.use(cors())
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
@@ -24,6 +27,21 @@ const passportConfig = require("./passportConfig");
 passport.use(passportConfig.strategy);
 passport.serializeUser(passportConfig.serializeUser);
 passport.deserializeUser(passportConfig.deserializeUser);
+
+// socket.io
+const httpServer = require("http").createServer(app);
+const io = require("socket.io")(httpServer);
+
+io.on('connection', (socket) => {
+  socket.on('chat message', (msg) => {
+    console.log('message: ' + msg);
+    io.emit('chat message', msg);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+});
 
 // Dodajemy usługi REST, które należy zdefiniować w pliku „users.js”
 // znajdującym się w podkatalogu „routes”
@@ -61,6 +79,8 @@ app.get('/logout', (req, res, next) => {
     });
 });
 
+app.get('/chat', (_req, res) => res.render('chat'));
+
 const viewUsers = require('../routes/viewUsers');
 app.use('/', viewUsers);
 
@@ -85,7 +105,7 @@ mongoose
     })
     .then(response => {
         console.log(`Connected to MongoDB. Database name: "${response.connections[0].name}"`)
-        app.listen(apiPort, () => {
+        httpServer.listen(apiPort, () => {
             console.log(`API server available from: http://${apiHost}:${apiPort}`);
         });
     })

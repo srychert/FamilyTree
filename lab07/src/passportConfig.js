@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 
 // Konfiguracja Passport.js
 const serializeUser = (user, done) => done(null, user.id);
@@ -28,9 +29,7 @@ const validateUser = (login, password, done) => {
             done(err);
         }
         if (user) {
-            // if (user.password === HASH(password)) {
-            // dla ułatwienia hasła będą w „plain text” (nie używać „produkcyjnie”!)
-            if (user.password === password) {
+            if (bcrypt.compareSync(password, user.password)) {
                 done(null, user);
             } else {
                 done(null, null);
