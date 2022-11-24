@@ -31,16 +31,43 @@ passport.deserializeUser(passportConfig.deserializeUser);
 // socket.io
 const httpServer = require("http").createServer(app);
 const io = require("socket.io")(httpServer);
+const Room = require('../models/Room');
 
 io.on('connection', (socket) => {
-  socket.on('chat message', (msg) => {
-    console.log('message: ' + msg);
-    io.emit('chat message', msg);
-  });
+    socket.on("join", async (msg) => {
+        if(!msg){
+            console.log("join: " + msg)
+            const room = await Room.create({
+                history: []
+            });
 
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
-  });
+            socket.join(room._id)
+            io.to(room._id).emit("chat message", "hi from new room")
+            return
+        }
+
+        try {
+            const room = await Room.find({"_id": msg});
+            console.log(room)
+            socket.join(room._id)
+            io.to("room").emit("chat message", "hi")
+        } catch (err) {
+             if (err.message instanceof mongoose.Error.CastError){
+                return
+            }
+            return
+        }
+        
+    })
+
+    socket.on('chat message', (msg) => {
+        console.log('message: ' + msg);
+        io.emit('chat message', msg);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('user disconnected');
+    });
 });
 
 // Dodajemy usługi REST, które należy zdefiniować w pliku „users.js”

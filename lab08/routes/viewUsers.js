@@ -1,4 +1,5 @@
 const express = require('express');
+const Room = require('../models/Room');
 const router = express.Router();
 
 const User = require('../models/User');
@@ -15,6 +16,13 @@ router.get('/', loggedIn, isAdmin, async (req, res) => {
 
 router.get('/new', loggedIn, isAdmin, (req, res) => {
     res.render('new');
+})
+
+router.get('/rooms', loggedIn, async (req, res) => {
+    const rooms = await Room.find({}).lean();
+    res.render('new', {
+        rooms
+    });
 })
 
 router.get('/user/:id', loggedIn, async (req, res) => {
