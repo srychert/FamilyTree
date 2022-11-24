@@ -79,8 +79,6 @@ app.get('/logout', (req, res, next) => {
     });
 });
 
-app.get('/chat', (_req, res) => res.render('chat'));
-
 const viewUsers = require('../routes/viewUsers');
 app.use('/', viewUsers);
 

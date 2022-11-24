@@ -13,6 +13,7 @@
 
 <script>
     const socket = io();
+    const login = "{{this.login}}";
 
     const messages = document.getElementById('messages');
     const form = document.getElementById('chat-form');
@@ -21,7 +22,7 @@
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         if (message.value) {
-            socket.emit('chat message', message.value);
+            socket.emit('chat message', `${login}: ${message.value}`);
             message.value = '';
         }
     });

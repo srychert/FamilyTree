@@ -36,4 +36,10 @@ router.get('/user/:id', loggedIn, async (req, res) => {
 
 })
 
+router.get('/chat', loggedIn, (req, res) => {
+    res.render('chat', {
+        login: req.user.login
+    });
+});
+
 module.exports = router;
