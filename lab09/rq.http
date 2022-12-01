@@ -1,0 +1,42 @@
+POST http://localhost:3000/users HTTP/1.1
+content-type: application/json
+
+{
+	"login": "user",
+	"password": "pass",
+	"email": "user@example.com",
+	"registrationDate": "01/01/2022",
+	"role": "USER"
+}
+
+#######
+
+POST http://localhost:3000/users HTTP/1.1
+content-type: application/json
+
+{
+	"login": "admin",
+	"password": "1234",
+	"email": "admin@example.com",
+	"registrationDate": "01/06/2022",
+	"role": "ADMIN"
+}
+
+#######
+GET http://localhost:3000/users HTTP/1.1
+
+#######
+GET http://localhost:3000/users/636d06b30e7ea72f756bf4b6 HTTP/1.1
+
+#######
+PUT http://localhost:3000/users/636d06b30e7ea72f756bf4b6 HTTP/1.1
+content-type: application/json
+
+{
+	"login": "seba2",
+	"email": "seba2@example.com",
+	"registrationDate": "11/11/2022"
+}
+
+#######
+DELETE http://localhost:3000/users/637c80784d05e202cef3d73a HTTP/1.1

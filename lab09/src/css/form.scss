@@ -1,0 +1,29 @@
+.form {
+    display: grid;
+    place-content: center;
+
+    .form-row {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 20px;
+        gap: 4px;
+    }
+
+    input {
+        border: none;
+        background-color: var(--bg);
+        color: var(--accent);
+        padding: 0.5em;
+    }
+
+    input::placeholder {
+        color: var(--accent);
+        filter: brightness(80%);
+    }
+
+    input:focus {
+        outline: none;
+        box-shadow: 0 0 0 0.125rem var(--primary);
+    }
+    
+}
