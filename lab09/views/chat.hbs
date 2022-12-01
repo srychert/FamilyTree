@@ -1,6 +1,14 @@
 {{> buttons loggedIn=true}}
 
 <h1>Chat</h1>
+<div class="rooms">
+    {{#each rooms}}
+        <div class="card" id="{{this._id}}" onclick="joinRoom('{{this._id}}')" >
+            <div class="card-text">{{this._id}}</div>
+        </div>
+    {{/each}}
+</div>
+
 <form class="form" id="chat-form">
     <div class="form-row">
         <label for="message">Message</label>
@@ -14,8 +22,14 @@
 <script>
     const socket = io();
     const login = "{{this.login}}";
+    let roomId = undefined
 
-    socket.emit("join", "test");
+    const joinRoom = (id) => {
+        // empty id creates new room
+        roomId = id
+        console.log(id)
+        socket.emit("join", id);
+    }
 
     const messages = document.getElementById('messages');
     const form = document.getElementById('chat-form');
@@ -23,15 +37,20 @@
 
     form.addEventListener('submit', function (e) {
         e.preventDefault();
-        if (message.value) {
-            socket.emit('chat message', `${login}: ${message.value}`);
+        if (message.value && roomId) {
+            let msg = {
+                roomId,
+                message: `${login}: ${message.value}`
+            }
+
+            socket.emit('chat message', JSON.stringify(msg));
             message.value = '';
         }
     });
 
     socket.on('chat message', function (msg) {
         const item = document.createElement('li');
-        item.textContent = msg;
+        item.textContent = JSON.parse(msg)?.message;
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
     });

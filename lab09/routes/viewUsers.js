@@ -44,9 +44,11 @@ router.get('/user/:id', loggedIn, async (req, res) => {
 
 })
 
-router.get('/chat', loggedIn, (req, res) => {
+router.get('/chat', loggedIn, async (req, res) => {
+    const rooms = await Room.find({}).lean();
     res.render('chat', {
-        login: req.user.login
+        login: req.user.login,
+        rooms
     });
 });
 

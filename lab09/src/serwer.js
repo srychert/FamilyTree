@@ -32,11 +32,11 @@ passport.deserializeUser(passportConfig.deserializeUser);
 const httpServer = require("http").createServer(app);
 const io = require("socket.io")(httpServer);
 const Room = require('../models/Room');
+const Message = require('../models/Message');
 
 io.on('connection', (socket) => {
     socket.on("join", async (msg) => {
         if(!msg){
-            console.log("join: " + msg)
             const room = await Room.create({
                 history: []
             });
@@ -46,22 +46,24 @@ io.on('connection', (socket) => {
             return
         }
 
-        try {
-            const room = await Room.find({"_id": msg});
-            console.log(room)
-            socket.join(room._id)
-            io.to("room").emit("chat message", "hi")
-        } catch (err) {
-             if (err.message instanceof mongoose.Error.CastError){
-                return
-            }
+        const roomArr = await Room.find({"_id": msg});
+        if (roomArr.lenght != 1){
             return
         }
+
+        socket.join(roomArr[0]._id)
+        io.to(roomArr[0]._id).emit("chat message", "hi from room")
         
     })
 
-    socket.on('chat message', (msg) => {
-        console.log('message: ' + msg);
+    socket.on('chat message', async (msg) => {
+        const message = JSON.parse(msg)
+        console.log('message: ', message);
+        const historyMsg = Message.create({
+            message: message?.message,
+            timeStamp: new Date()
+        })
+        Room.findOneAndUpdate({"_id": message?.roomId}, { "$push": { "history": historyMsg} })
         io.emit('chat message', msg);
     });
 
