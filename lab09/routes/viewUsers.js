@@ -18,13 +18,6 @@ router.get('/new', loggedIn, isAdmin, (req, res) => {
     res.render('new');
 })
 
-router.get('/rooms', loggedIn, async (req, res) => {
-    const rooms = await Room.find({}).lean();
-    res.render('new', {
-        rooms
-    });
-})
-
 router.get('/user/:id', loggedIn, async (req, res) => {
     const id = req.params.id;
     const idAuth = req.user.id.toString();
@@ -50,6 +43,12 @@ router.get('/chat', loggedIn, async (req, res) => {
         login: req.user.login,
         rooms
     });
+});
+
+router.get('/chat/:id', loggedIn, async (req, res) => {
+    const id = req.params.id;
+    const room = await Room.findById(id).populate("history").lean();
+    res.send(room)
 });
 
 module.exports = router;

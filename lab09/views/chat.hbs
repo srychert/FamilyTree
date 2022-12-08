@@ -1,10 +1,11 @@
 {{> buttons loggedIn=true}}
 
 <h1>Chat</h1>
-<div class="rooms">
+<button class="button" onclick="createRoom()">Create New Room</button>
+<div class="users">
     {{#each rooms}}
         <div class="card" id="{{this._id}}" onclick="joinRoom('{{this._id}}')" >
-            <div class="card-text">{{this._id}}</div>
+            <div class="card-text">{{this.name}}</div>
         </div>
     {{/each}}
 </div>
@@ -24,33 +25,59 @@
     const login = "{{this.login}}";
     let roomId = undefined
 
-    const joinRoom = (id) => {
-        // empty id creates new room
-        roomId = id
-        console.log(id)
-        socket.emit("join", id);
-    }
-
     const messages = document.getElementById('messages');
     const form = document.getElementById('chat-form');
     const message = document.getElementById('message');
+
+    const formatTimeStamp = (stringTime) => {
+        let timeStampArr = stringTime.split("T")
+        return timeStampArr[0] + " " + timeStampArr[1].slice(0, 5)
+    }
+
+    const createRoom = () =>{
+        socket.emit("create", { name: "chat-" + Math.floor(Math.random() * 1_000_000) });
+        location.reload()
+    }
+
+    const joinRoom = (id) => {
+        roomId = id
+        socket.emit("join", { id });
+
+        fetch(`http://localhost:3000/chat/${id}`)
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data)
+                
+                if(!data){
+                    return
+                }
+
+                data.history.forEach(element => {
+                    const item = document.createElement('li');
+                    item.textContent = `${formatTimeStamp(element.timeStamp)} ${element.message}`;
+                    messages.appendChild(item);
+                });
+            })
+            .catch (err => console.log(err))
+    }
 
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         if (message.value && roomId) {
             let msg = {
                 roomId,
-                message: `${login}: ${message.value}`
+                message: `${login}: ${message.value}`,
+                timeStamp: new Date(),
             }
 
-            socket.emit('chat message', JSON.stringify(msg));
+            socket.emit('chat message', msg);
             message.value = '';
         }
     });
 
     socket.on('chat message', function (msg) {
         const item = document.createElement('li');
-        item.textContent = JSON.parse(msg)?.message;
+        item.textContent = `${formatTimeStamp(msg?.timeStamp.toString())} ${msg?.message}`;
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
     });

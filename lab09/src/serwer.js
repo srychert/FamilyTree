@@ -35,35 +35,38 @@ const Room = require('../models/Room');
 const Message = require('../models/Message');
 
 io.on('connection', (socket) => {
-    socket.on("join", async (msg) => {
-        if(!msg){
-            const room = await Room.create({
-                history: []
-            });
-
-            socket.join(room._id)
-            io.to(room._id).emit("chat message", "hi from new room")
+    socket.on("create", async (msg) => {
+        if (!msg.id && !msg?.name) {
             return
         }
 
-        const roomArr = await Room.find({"_id": msg});
-        if (roomArr.lenght != 1){
+        const room = await Room.create({
+            name: msg?.name,
+            history: []
+        });
+
+        socket.join(room._id)
+        io.to(room._id).emit("chat message", { message: "server: hi from new room", timeStamp: new Date() })
+    })
+
+
+    socket.on("join", async (msg) => {
+        const roomArr = await Room.find({ "_id": msg?.id });
+
+        if (roomArr.lenght != 1) {
             return
         }
 
         socket.join(roomArr[0]._id)
-        io.to(roomArr[0]._id).emit("chat message", "hi from room")
-        
     })
 
     socket.on('chat message', async (msg) => {
-        const message = JSON.parse(msg)
-        console.log('message: ', message);
-        const historyMsg = Message.create({
+        const message = msg
+        const historyMsg = await Message.create({
             message: message?.message,
-            timeStamp: new Date()
+            timeStamp: message?.timeStamp
         })
-        Room.findOneAndUpdate({"_id": message?.roomId}, { "$push": { "history": historyMsg} })
+        await Room.findOneAndUpdate({ "_id": message?.roomId }, { "$push": { "history": historyMsg._id } })
         io.emit('chat message', msg);
     });
 

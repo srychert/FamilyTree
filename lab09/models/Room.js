@@ -1,13 +1,11 @@
-const { Schema, model } = require('mongoose');
-// const Message = require('./Message');
-
-const messageSchema = new Schema({
-    msg: String,
-    timeStamp: Date,
-});
+const { Schema, model, ObjectId } = require('mongoose');
 
 const roomSchema = new Schema({
-    history: [messageSchema],
+    name: {
+        type: String,
+        required: true
+    },
+    history: [{ type: ObjectId, ref: 'Message' }],
 });
 
 
