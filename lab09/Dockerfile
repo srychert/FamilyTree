@@ -6,8 +6,9 @@ ENV NODE_ENV=${NODE_ENV}
 WORKDIR /opt/app
 
 COPY ./package.json ./
+COPY ./package-lock.json ./
 
-RUN yarn install --production
+RUN npm install --production
 
 RUN mkdir -p node_modules/.cache && chmod -R 777 node_modules/.cache
 
