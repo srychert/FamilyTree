@@ -29,8 +29,12 @@ const app = Vue.createApp({
 			newBarWidth = newBarWidth < 0 ? 0 : newBarWidth;
 			this.opponentBarWidth = newBarWidth;
 		},
-		round(_newRound, _oldRound) {
+		async round(_newRound, _oldRound) {
 			console.log(this.playerHealth, this.opponentHealth);
+
+			/* prettier-ignore */
+			await new Promise(r => setTimeout(() => {r()}, 10))
+
 			if (this.playerHealth < 1 && this.opponentHealth < 1) {
 				alert("Remis");
 				this.clear();
@@ -81,7 +85,6 @@ const app = Vue.createApp({
 			this.playerHealth = initialHealth;
 			this.opponentHealth = initialHealth;
 			this.dataLog = {};
-			// change bars
 		},
 		playerAttack() {
 			const playerA = this.attack();
