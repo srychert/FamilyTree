@@ -1,14 +1,17 @@
 <template>
-  <HelloWorld msg="Hello Vue!" />
+  <Header></Header>
+  <Game></Game>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
+import Game from "./components/Game.vue";
+import Header from "./components/Header.vue";
 
 export default {
   name: "App",
   components: {
-    HelloWorld,
+    Header,
+    Game,
   },
 };
 </script>
