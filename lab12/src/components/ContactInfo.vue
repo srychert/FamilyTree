@@ -1,8 +1,14 @@
 <template>
 	<li>
 		<h2>{{ name }} <img v-if="isFriend" class="friendIcon" src="friends.png" alt="" /></h2>
-		<button @click="toggleFriend">Usuń/Dodaj ze/do znajomych</button>
-		<button @click="toggleDetails">Ukryj/Pokaż szczegóły</button>
+		<button @click="toggleFriend">
+			<span v-if="isFriend">Usuń ze znajomych</span>
+			<span v-else>Dodaj do znajomych</span>
+		</button>
+		<button @click="toggleDetails">
+			<span v-if="showDetails">Ukryj szczegóły</span>
+			<span v-else>Pokaż szczegóły</span>
+		</button>
 		<ul v-show="showDetails">
 			<li>
 				<strong>telefon:</strong>
