@@ -5,7 +5,7 @@ const apiClient = axios.create({
     withCredentials: false,
     headers: {
         Accept: 'application/json',
-        'Content-Type': 'application.json'
+        'Content-Type': 'application/json'
     }
 });
 
@@ -15,5 +15,8 @@ export default {
     },
     getPerson(id) {
         return apiClient.get('/persons/' + id)
+    },
+    postPerson(newPerson) {
+        return apiClient.post('/persons', newPerson)
     }
 };
