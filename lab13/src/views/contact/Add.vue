@@ -69,7 +69,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 form {
 	display: grid;
 	place-content: center;
