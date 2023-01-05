@@ -1,22 +1,25 @@
-import axios from 'axios'
+import axios from "axios";
 
 const apiClient = axios.create({
-    baseURL: 'http://localhost:5000',
-    withCredentials: false,
-    headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-    }
+	baseURL: "http://localhost:5000",
+	withCredentials: false,
+	headers: {
+		Accept: "application/json",
+		"Content-Type": "application/json",
+	},
 });
 
 export default {
-    getPersons(pageSize, pageNo) {
-        return apiClient.get('/persons' + '/?_limit=' + pageSize + '&_page=' + pageNo)
-    },
-    getPerson(id) {
-        return apiClient.get('/persons/' + id)
-    },
-    postPerson(newPerson) {
-        return apiClient.post('/persons', newPerson)
-    }
+	getPersons(pageSize, pageNo) {
+		return apiClient.get("/persons" + "/?_limit=" + pageSize + "&_page=" + pageNo);
+	},
+	getPerson(id) {
+		return apiClient.get("/persons/" + id);
+	},
+	postPerson(newPerson) {
+		return apiClient.post("/persons", newPerson);
+	},
+	editPerson(updatedPerson) {
+		return apiClient.put("/persons/" + updatedPerson.id, updatedPerson);
+	},
 };
