@@ -53,20 +53,17 @@ export default {
 			DataService.postPerson(newContact)
 				.then((response) => {
 					console.log(response.data);
+					// „programowo” przełączamy sie na szczegóły kontaktu
+					this.$router.push({
+						name: "ContactDetails",
+						// params: {id: this.item.id } // niepotrzebne
+					});
+					// ścieżka wygląda nastepujaco /person/:id/add
 				})
 				.catch((err) => {
 					console.log(err);
 					this.$router.push({ name: "NetworkError" });
 				});
-
-			// tworzymy i zapisujemy kontakt z pomocą (nieobecnego) API
-			console.log("Dodawanie kontalktu");
-			// „programowo” przełączamy sie na szczegóły kontaktu
-			// this.$router.push({
-			// 	name: "ContactDetails", // ,
-			// 	// params: {id: this.item.id } // niepotrzebne
-			// });
-			// ścieżka wygląda nastepujaco /person/:id/add
 		},
 	},
 };
