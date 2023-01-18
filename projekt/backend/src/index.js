@@ -50,8 +50,17 @@ mongoose
 	.connect(`mongodb://${dbConnData.host}:${dbConnData.port}/${dbConnData.database}`)
 	.then((response) => {
 		console.log(`Connected to MongoDB. Database name: "${response.connections[0].name}"`);
-		app.listen(PORT, () => {
-			console.log(`API server listening on port ${PORT}`);
-		});
 	})
 	.catch((error) => console.error("Error connecting to MongoDB", error));
+
+// connect to neo4j
+try {
+	require("./neo4j/neo4jDriver");
+	console.log(`Connected to Neo4J.`);
+} catch (ex) {
+	console.error("Error connecting to Neo4J", ex);
+}
+
+app.listen(PORT, () => {
+	console.log(`API server listening on port ${PORT}`);
+});
