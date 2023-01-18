@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
-const hasRoles = require("../src/passport/hasRoles");
-const isOwner = require("../src/passport/isOwner");
+const hasRoles = require("../passport/hasRoles");
+const isOwner = require("../passport/isOwner");
 
 const checkPassword = (password) => {
 	if (typeof password !== "string") {

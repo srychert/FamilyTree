@@ -40,31 +40,10 @@ const mongoose = require("mongoose");
 mongoose.set("strictQuery", false);
 
 // use routes
-const users = require("../routes/users");
+const users = require("./routes/users");
 app.use("/users", users);
-const auth = require("../routes/auth");
+const auth = require("./routes/auth");
 app.use("/", auth);
-
-// app.post(
-// 	"/login",
-// 	passport.authenticate("json", { failWithError: true }),
-// 	// handle error
-// 	function (_err, _req, res, _next) {
-// 		return res.status(401).send();
-// 	},
-// 	function (req, res, _next) {
-// 		return res.status(200).send({ id: req.user._id });
-// 	}
-// );
-
-// app.get("/logout", (req, res, next) => {
-// 	req.logout((err) => {
-// 		if (err) {
-// 			return next(err);
-// 		}
-// 		res.redirect("/");
-// 	});
-// });
 
 // connect to mongodb
 mongoose
