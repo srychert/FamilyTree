@@ -14,9 +14,18 @@ router.post(
 			id: req.user._id,
 			login: req.user.login,
 			registrationDate: req.user.registrationDate,
-			role: req.user.role
+			role: req.user.role,
 		});
 	}
 );
+
+router.post("/logout", function (req, res, next) {
+	req.logout(function (err) {
+		if (err) {
+			return res.status(401).send();
+		}
+		return res.status(200).send();
+	});
+});
 
 module.exports = router;
