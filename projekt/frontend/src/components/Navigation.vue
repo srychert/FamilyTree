@@ -26,7 +26,7 @@ const handelLogout = async () => {
 			<RouterLink to="/login" class="link login">LogIn</RouterLink>
 			<div class="divider"></div>
 		</div>
-		<a v-else tabindex="0" class="link link-wrapper logout" @click="handelLogout"> LogOut </a>
+		<a v-else tabindex="0" class="link link-wrapper logout" @click="handelLogout" @keyup.enter="handelLogout"> LogOut </a>
 	</nav>
 </template>
 
