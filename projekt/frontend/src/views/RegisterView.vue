@@ -17,6 +17,10 @@ const handelLogin = () => {
 		.catch((err) => {
 			console.error(err);
 			if (err.message) {
+				if (err.response.data.includes("duplicate key error collection")) {
+					error.value = "Login already taken";
+					return;
+				}
 				error.value = err.message;
 			}
 		});
