@@ -12,20 +12,19 @@ const error = ref("");
 
 const handelLogin = () => {
 	userStore
-		.logIn(login.value, password.value)
+		.register(login.value, password.value)
 		.then(() => router.push("/"))
 		.catch((err) => {
 			console.error(err);
-			if (err.response.status === 401) {
-				error.value = "Incorrect Credentials";
-				console.log(error);
+			if (err.message) {
+				error.value = err.message;
 			}
 		});
 };
 </script>
 
 <template>
-	<h1>LogIn</h1>
+	<h1>Register</h1>
 	<form @submit.prevent="handelLogin">
 		<div class="form-row">
 			<label for="login">Login</label>
@@ -37,7 +36,7 @@ const handelLogin = () => {
 			<input id="password" type="password" v-model="password" required />
 		</div>
 
-		<input type="submit" value="Login" />
+		<input type="submit" value="Register" />
 	</form>
 	<span class="error">{{ error }}</span>
 </template>

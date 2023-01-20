@@ -29,5 +29,14 @@ export const useUserStore = defineStore("user", {
 
 			this.user = user;
 		},
+		async register(login, password) {
+			const res = await api().post(`/users`, {
+				login,
+				password,
+			});
+			const user = res.data;
+
+			this.user = user;
+		},
 	},
 });

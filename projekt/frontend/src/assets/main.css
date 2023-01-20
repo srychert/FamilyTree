@@ -26,6 +26,16 @@ input:focus {
   box-shadow: 0px 0px 8px 0px hsl(0, 0%, 100%);
 }
 
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.error {
+  color: red;
+}
+
 .underline::after {
   content: "";
   position: absolute;
