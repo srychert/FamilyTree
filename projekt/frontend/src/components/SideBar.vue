@@ -3,7 +3,9 @@ import Navigaton from "@/components/Navigation.vue";
 import { useUserStore } from "@/stores/user";
 import Burger from "@/components/Burger.vue";
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const userStore = useUserStore();
 const isOpen = ref(true);
 const spanBackground = ref("var(--dark)");
@@ -16,15 +18,17 @@ const handleToggleNav = (e) => {
 		spanBackground.value = "var(--light)";
 	}
 };
+
+const goToProfile = () => router.push("/profile");
 </script>
 
 <template>
 	<Burger :spanBackground="spanBackground" @toggleOpen="handleToggleNav" />
 	<div class="sidebar" :class="{ open: isOpen }">
 		<div class="logo">
-			<div class="profile">
+			<div class="profile" tabindex="0" @click="goToProfile">
 				<span v-if="userStore.user">{{ userStore.user.login[0] }}</span>
-				<span v-else>U</span>
+				<span v-else>P</span>
 			</div>
 		</div>
 		<Navigaton />
@@ -86,5 +90,13 @@ const handleToggleNav = (e) => {
 	font-size: xx-large;
 	color: var(--dark);
 	text-transform: capitalize;
+	user-select: none;
+	cursor: pointer;
+}
+
+.profile:hover,
+.profile:focus {
+	color: var(--light);
+	background: var(--dark);
 }
 </style>
