@@ -1,0 +1,66 @@
+version: '3.1'
+
+services:
+  mongo:
+    image: mongo
+    container_name: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongo/data:/data/db
+      - ./mongo/log:/var/log/mongodb
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    depends_on:
+      - mongo
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+  
+  neo4j:
+    hostname: neo4j
+    image: neo4j
+    ports:
+      - 7474:7474
+      - 7687:7687
+    environment:
+      NEO4J_AUTH: neo4j/secret1234
+    volumes:
+      - ./neo4j/data:/data
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: api
+    restart: always
+    ports:
+      - '5000:5000'
+    depends_on:
+      - mongo
+      - neo4j
+    environment:
+      - SECRET=secret
+      - MONGO_HOST=mongo
+      - NEO4J_URI=bolt://neo4j:7687
+  
+  website:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: website
+    restart: always
+    ports:
+      - '3000:80'
+    depends_on:
+      - mongo
+      - neo4j
+      - api
+    environment:
+      - VITE_API=http://api:5000
+      - VITE_SOCKET_ENDPOINT=http://api:5000
