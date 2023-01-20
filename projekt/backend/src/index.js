@@ -24,6 +24,8 @@ app.use(
 	})
 );
 
+const httpServer = require("http").createServer(app);
+
 // passport config
 const passport = require("passport");
 app.use(passport.initialize());
@@ -32,6 +34,28 @@ const passportConfig = require("./passport/passportConfig");
 passport.use(passportConfig.strategy);
 passport.serializeUser(passportConfig.serializeUser);
 passport.deserializeUser(passportConfig.deserializeUser);
+
+const io = require("socket.io")(httpServer, {
+	cors: {
+		origin: true,
+		credentials: true,
+	},
+});
+
+io.on("connect", (socket) => {
+	console.log(`new connection ${socket.id}`);
+	console.log(socket.request.user);
+
+	socket.on("msg", (msg) => {
+		console.log(msg);
+		io.emit("broadcast", "lol");
+	});
+
+	// const session = socket.request.session;
+	// console.log(`saving sid ${socket.id} in session ${session.id}`);
+	// session.socketId = socket.id;
+	// session.save();
+});
 
 // mongodb config
 const PORT = process.env.PORT || 5000;
@@ -67,6 +91,6 @@ try {
 	console.error("Error connecting to Neo4J", ex);
 }
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
 	console.log(`API server listening on port ${PORT}`);
 });
