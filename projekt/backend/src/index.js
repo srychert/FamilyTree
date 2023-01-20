@@ -16,13 +16,13 @@ app.use(express.json());
 
 app.use(require("body-parser").json());
 
-app.use(
-	require("express-session")({
-		secret: process.env.SECRET || "$ecret",
-		resave: false,
-		saveUninitialized: false,
-	})
-);
+const sessionMiddleware = require("express-session")({
+	secret: process.env.SECRET || "$ecret",
+	resave: false,
+	saveUninitialized: false,
+});
+
+app.use(sessionMiddleware);
 
 const httpServer = require("http").createServer(app);
 
@@ -35,6 +35,7 @@ passport.use(passportConfig.strategy);
 passport.serializeUser(passportConfig.serializeUser);
 passport.deserializeUser(passportConfig.deserializeUser);
 
+// socket.io
 const io = require("socket.io")(httpServer, {
 	cors: {
 		origin: true,
@@ -42,19 +43,34 @@ const io = require("socket.io")(httpServer, {
 	},
 });
 
+// convert a connect middleware to a Socket.IO middleware
+const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, next);
+
+io.use(wrap(sessionMiddleware));
+io.use(wrap(passport.initialize()));
+io.use(wrap(passport.session()));
+
+// only allow logedIn users
+io.use((socket, next) => {
+	if (socket.request.user) {
+		next();
+	} else {
+		next(new Error("unauthorized"));
+	}
+});
+
 io.on("connect", (socket) => {
-	console.log(`new connection ${socket.id}`);
-	console.log(socket.request.user);
+	console.log(`new connection ${socket.id}`);	
 
 	socket.on("msg", (msg) => {
 		console.log(msg);
 		io.emit("broadcast", "lol");
 	});
 
-	// const session = socket.request.session;
-	// console.log(`saving sid ${socket.id} in session ${session.id}`);
-	// session.socketId = socket.id;
-	// session.save();
+	const session = socket.request.session;
+	console.log(`saving sid ${socket.id} in session ${session.id}`);
+	session.socketId = socket.id;
+	session.save();
 });
 
 // mongodb config
