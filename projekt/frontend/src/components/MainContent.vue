@@ -11,6 +11,6 @@ import { RouterView } from "vue-router";
 <style scoped>
 main {
 	flex: 1;
-	padding: 2rem;
+	padding: 2.5rem 2rem 0 2rem;
 }
 </style>

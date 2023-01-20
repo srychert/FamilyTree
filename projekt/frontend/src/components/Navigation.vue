@@ -13,20 +13,22 @@ const handelLogout = async () => {
 
 <template>
 	<nav>
-		<RouterLink to="/" class="link link-wrapper">
+		<div class="link-wrapper">
 			<span class="material-symbols-outlined"> home </span>
-			<span>Home</span>
-		</RouterLink>
-		<RouterLink to="/tree" class="link link-wrapper">
+			<RouterLink to="/" class="link underline"> Home </RouterLink>
+		</div>
+		<div class="link-wrapper">
 			<span class="material-symbols-outlined"> nature </span>
-			<span>Tree</span>
-		</RouterLink>
+			<RouterLink to="/tree" class="link underline"> Tree </RouterLink>
+		</div>
 		<div v-if="!userStore.user" class="link-wrapper login-wrapper">
-			<RouterLink to="/register" class="link register">Register</RouterLink>
-			<RouterLink to="/login" class="link login">LogIn</RouterLink>
+			<RouterLink to="/register" class="link register underline">Register</RouterLink>
+			<RouterLink to="/login" class="link login underline">LogIn</RouterLink>
 			<div class="divider"></div>
 		</div>
-		<a v-else tabindex="0" class="link link-wrapper logout" @click="handelLogout" @keyup.enter="handelLogout"> LogOut </a>
+		<div v-else class="link-wrapper logout">
+			<a tabindex="0" class="link underline" @click="handelLogout" @keyup.enter="handelLogout"> LogOut </a>
+		</div>
 	</nav>
 </template>
 
@@ -39,7 +41,10 @@ nav {
 }
 
 .link-wrapper {
-	display: block;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+
 	padding: 2em;
 	border-bottom: 1px solid var(--light);
 	white-space: nowrap;
@@ -50,15 +55,10 @@ nav {
 .link {
 	color: var(--light);
 	text-decoration: none;
-	display: flex;
-	align-items: center;
-	gap: 4px;
 }
 
 .link:focus {
-	background-color: var(--dark-focus);
 	outline: none;
-	border: none;
 }
 
 .divider {
@@ -93,38 +93,8 @@ nav {
 	color: var(--dark);
 }
 
-.login:focus,
-.register:focus {
-	background-color: inherit;
-}
-
-.login::after,
-.register::after {
-	content: "";
-	position: absolute;
-	width: 100%;
-	transform: scaleX(0);
-	height: 2px;
-	bottom: 0;
-	left: 0;
-	transform-origin: bottom right;
-	transition: transform 0.25s ease-out;
-}
-
 .login::after {
 	background-color: var(--dark);
-}
-
-.register::after {
-	background-color: var(--light);
-}
-
-.login:focus::after,
-.login:hover::after,
-.register:focus::after,
-.register:hover::after {
-	transform: scaleX(1);
-	transform-origin: bottom left;
 }
 
 .logout {
