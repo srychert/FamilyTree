@@ -21,6 +21,10 @@ const handelLogout = async () => {
 			<span class="material-symbols-outlined"> nature </span>
 			<RouterLink to="/tree" class="link underline"> Tree </RouterLink>
 		</div>
+		<div class="link-wrapper">
+			<span class="material-symbols-outlined"> chat </span>
+			<RouterLink to="/chat" class="link underline"> Chat </RouterLink>
+		</div>
 		<div v-if="!userStore.user" class="link-wrapper login-wrapper">
 			<RouterLink to="/register" class="link register underline">Register</RouterLink>
 			<RouterLink to="/login" class="link login underline">LogIn</RouterLink>

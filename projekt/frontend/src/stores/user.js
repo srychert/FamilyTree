@@ -1,4 +1,4 @@
-import { defineStore } from "pinia";
+import { defineStore, getActivePinia } from "pinia";
 import api from "../api";
 import Cookies from "js-cookie";
 
@@ -21,7 +21,10 @@ export const useUserStore = defineStore("user", {
 		async logOut() {
 			await api().post("/logout");
 			Cookies.remove("userId");
-			this.user = null;
+			// this.user = null;
+
+			// reset all stores
+			getActivePinia()._s.forEach((store) => store.$reset());
 		},
 		async getUser(id) {
 			const res = await api().get(`/users/${id}`);
