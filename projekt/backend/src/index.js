@@ -43,35 +43,11 @@ const io = require("socket.io")(httpServer, {
 	},
 });
 
-// convert a connect middleware to a Socket.IO middleware
-const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, next);
+const ioConfig = require("./socketio/config");
+ioConfig.configure(io, sessionMiddleware);
 
-io.use(wrap(sessionMiddleware));
-io.use(wrap(passport.initialize()));
-io.use(wrap(passport.session()));
-
-// only allow logedIn users
-io.use((socket, next) => {
-	if (socket.request.user) {
-		next();
-	} else {
-		next(new Error("unauthorized"));
-	}
-});
-
-io.on("connect", (socket) => {
-	console.log(`new connection ${socket.id}`);	
-
-	socket.on("msg", (msg) => {
-		console.log(msg);
-		io.emit("broadcast", "lol");
-	});
-
-	const session = socket.request.session;
-	console.log(`saving sid ${socket.id} in session ${session.id}`);
-	session.socketId = socket.id;
-	session.save();
-});
+const ioHandler = require("./socketio/handler");
+ioHandler.handel(io);
 
 // mongodb config
 const PORT = process.env.PORT || 5000;
