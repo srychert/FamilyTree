@@ -23,16 +23,16 @@ router.get("/", hasRoles("ADMIN"), async (req, res) => {
 });
 
 // New User
-router.post("/", hasRoles("ADMIN", "USER"), async (req, res) => {
+router.post("/", async (req, res) => {
 	try {
-		const { login, password, role } = req.body;
+		const { login, password } = req.body;
 		checkPassword(password);
 
 		const user = await User.create({
 			login,
 			password: bcrypt.hashSync(password, 12),
 			registrationDate: new Date(),
-			role,
+			role: "USER",
 		});
 		return res.send(user);
 	} catch (e) {
@@ -56,14 +56,11 @@ router.get("/:userId", hasRoles("ADMIN", "USER"), isOwner, async (req, res) => {
 router.put("/:userId", hasRoles("ADMIN", "USER"), isOwner, async (req, res) => {
 	try {
 		const id = req.params.userId;
-		const { login, password, registrationDate, role } = req.body;
+		const { login, password } = req.body;
 
-		// bcrypt.hashSync(password, 12),
 		const fields = {
 			login,
 			password,
-			registrationDate,
-			role,
 		};
 
 		const emptyFields = Object.entries(fields)
@@ -75,7 +72,13 @@ router.put("/:userId", hasRoles("ADMIN", "USER"), isOwner, async (req, res) => {
 		}
 
 		checkPassword(password);
-		const updatedUser = { ...fields, password: bcrypt.hashSync(password, 12) };
+		const userInDb = await User.findById(id);
+		const updatedUser = {
+			...fields,
+			password: bcrypt.hashSync(password, 12),
+			role: userInDb.role,
+			registrationDate: userInDb.registrationDate,
+		};
 
 		// new -> true to return the modified document rather than the original. defaults to false
 		// upsert -> creates the object if it doesn't exist. defaults to false.
@@ -103,21 +106,42 @@ router.delete("/:userId", hasRoles("ADMIN", "USER"), isOwner, async (req, res) =
 router.patch("/:userId", hasRoles("ADMIN", "USER"), isOwner, async (req, res) => {
 	try {
 		const id = req.params.userId;
-		const { login, password, registrationDate, role } = req.body;
-
-		// checkPassword(password);
+		const { login, password } = req.body;
 
 		const fields = {
 			login,
-			password: password ? bcrypt.hashSync(password, 12) : undefined,
-			registrationDate,
-			role,
+			password: password
+				? (() => {
+						checkPassword(password);
+						return bcrypt.hashSync(password, 12);
+				  })()
+				: undefined,
 		};
 		// make an object only with fields that have value
 		const updatedUser = Object.fromEntries(Object.entries(fields).filter(([_, v]) => v !== undefined));
 		// new -> true to return the modified document rather than the original. defaults to false
 		// upsert -> creates the object if it doesn't exist. defaults to false.
 		const user = await User.findByIdAndUpdate(id, updatedUser, { new: true, upsert: false, runValidators: true });
+		return res.send(user);
+	} catch (e) {
+		console.log(e.message);
+		return res.status(500).send(e.message);
+	}
+});
+
+router.patch("/:userId/role", hasRoles("ADMIN"), async (req, res) => {
+	try {
+		const id = req.params.userId;
+		const { role } = req.body;
+
+		if (!role || role === "") {
+			throw Error("Role can not be empty");
+		}
+
+		const userInDb = await User.findById(id);
+		userInDb.role = role;
+
+		const user = await User.findByIdAndUpdate(id, userInDb, { new: true, upsert: false, runValidators: true });
 		return res.send(user);
 	} catch (e) {
 		console.log(e.message);
