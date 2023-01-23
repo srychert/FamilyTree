@@ -12,10 +12,13 @@ class SocketioService {
 			withCredentials: true,
 		});
 
-		this.socket.on("msg", (data) => {
-			console.log(data);
-			chatStore.addMsg(data);
-		});
+		const listener = (eventName, ...args) => {
+			// console.log(eventName, args);
+			console.log(args[0]);
+			chatStore.addMsg(args[0]);
+		};
+
+		this.socket.onAny(listener);
 	}
 
 	isActive() {

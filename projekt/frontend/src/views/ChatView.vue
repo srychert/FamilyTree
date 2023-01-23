@@ -2,8 +2,10 @@
 import SocketioService from "@/services/socketio.service.js";
 import { onMounted, onBeforeUnmount, ref } from "vue";
 import { useChatStore } from "@/stores/chat";
+import { useUserStore } from "@/stores/user";
 
 const chatStore = useChatStore();
+const userStore = useUserStore();
 
 onMounted(() => {
 	if (!SocketioService.isActive()) {
@@ -18,8 +20,11 @@ onMounted(() => {
 const myMsg = ref("");
 
 const sendMsg = () => {
-	console.log(myMsg.value);
-	SocketioService.sendMsg(myMsg.value);
+	SocketioService.sendMsg({
+		content: myMsg.value,
+		from: userStore.user?.login,
+		to: "all",
+	});
 	myMsg.value = "";
 };
 </script>
@@ -30,9 +35,7 @@ const sendMsg = () => {
 	<input type="text" v-model="myMsg" @keyup.enter="sendMsg" />
 
 	<ul>
-		<li v-for="{ msg } in chatStore.chat" :key="msg">
-			{{ msg }}
-		</li>
+		<li v-for="{ id, from, to, content, dateSend } in chatStore.chat" :key="id">{{ content }}, {{ from }}, {{ to }}, {{ dateSend }}</li>
 	</ul>
 </template>
 
