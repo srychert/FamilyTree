@@ -37,28 +37,39 @@ const router = createRouter({
 	],
 });
 
-router.beforeEach((to, from) => {
+router.beforeEach(async (to, from) => {
 	// allowed routes for not logedIn users
 	if (["login", "register"].includes(to.name)) return true;
 
 	const userId = Cookies.get("userId");
 	const userStore = useUserStore();
 
-	if (!userStore.user && userId) {
-		userStore.getUser(userId).catch((err) => {
-			if (err.response.status === 401) {
-				Cookies.remove("userId");
-				router.push("/login");
-				return false;
-			} else {
-				console.error(err);
-				// maybe push to error page?
-				return false;
-			}
-		});
+	if (userStore.user && userId) {
+		return true;
 	}
 
-	return true;
+	if (!userStore.user && userId) {
+		userStore
+			.getUser(userId)
+			.then((r) => {
+				router.push(to);
+				return true;
+			})
+			.catch((err) => {
+				if (err.response.status === 401) {
+					Cookies.remove("userId");
+					router.push("/login");
+				} else {
+					console.error(err);
+					// maybe push to error page?
+				}
+			});
+	}
+
+	if (!userStore.user && !userId) {
+		router.push("/login");
+		return false;
+	}
 });
 
 export default router;
