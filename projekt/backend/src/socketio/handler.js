@@ -4,6 +4,11 @@ const handel = (io) => {
 	io.on("connect", (socket) => {
 		console.log(`new connection ${socket.id}`);
 
+		socket.on("join", (room) => {
+			socket.join(room);
+			socket.room = room;
+		});
+
 		socket.on("msg", async (msg) => {
 			try {
 				const msgToSave = await Message.create({
@@ -19,16 +24,12 @@ const handel = (io) => {
 						break;
 
 					default:
-						let logins = [msg.to, socket.request.user.login];
-						logins.sort();
-						let room = logins.join("");
-						socket.join(room);
-						io.in(room).emit("private", { ...msgToSave._doc, room });
+						io.in(socket.room).emit("private", { ...msgToSave._doc, room: socket.room });
 						break;
 				}
 			} catch (e) {
 				console.log(e.message);
-				io.to(session.socketId).emit("error", `${error}: ${e.message}`);
+				io.to(session.socketId).emit("error", `error: ${e.message}`);
 			}
 		});
 

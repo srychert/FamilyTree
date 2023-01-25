@@ -29,6 +29,10 @@ class SocketioService {
 		return false;
 	}
 
+	joinRoom(room) {
+		this.socket.emit("join", room);
+	}
+
 	sendMsg(msg) {
 		this.socket.emit("msg", msg);
 	}

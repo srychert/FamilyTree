@@ -34,14 +34,15 @@ const getMsgClass = (from) => {
 	return from === userStore.user.login ? "user-msg" : "other-msg";
 };
 
-const getRoom = () => {
+function getRoom() {
 	let logins = [selectedChat.value, userStore?.user?.login];
 	logins.sort();
 	return logins.join("");
-};
+}
 
 const selectedChat = ref("all");
 const handelSelect = () => {
+	SocketioService.joinRoom(getRoom());
 	if (selectedChat.value == "all") {
 		chatStore.getAll();
 	} else {
