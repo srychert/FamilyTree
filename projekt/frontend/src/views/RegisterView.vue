@@ -13,7 +13,7 @@ const error = ref("");
 const handelLogin = () => {
 	userStore
 		.register(login.value, password.value)
-		.then(() => router.push("/"))
+		.then(() => router.push("/login"))
 		.catch((err) => {
 			console.error(err);
 			if (err.message) {
