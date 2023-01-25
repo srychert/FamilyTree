@@ -8,7 +8,13 @@ export const useChatStore = defineStore("chat", {
 
 	actions: {
 		async addMsg(msg) {
-			this.chat.push(msg);
+			this.chat.unshift(msg);
+		},
+		async getAll() {
+			const res = await api().get(`/chat`);
+			const chat = res.data.reverse();
+
+			this.chat = chat;
 		},
 	},
 });
