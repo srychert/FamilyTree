@@ -12,7 +12,7 @@ const checkPassword = (password) => {
 };
 
 // Get all
-router.get("/", hasRoles("ADMIN"), async (req, res) => {
+router.get("/", hasRoles("ADMIN", "USER"), async (req, res) => {
 	try {
 		const users = await User.find({});
 		return res.send(users);

@@ -5,8 +5,6 @@ const handel = (io) => {
 		console.log(`new connection ${socket.id}`);
 
 		socket.on("msg", async (msg) => {
-			console.log(msg);	
-
 			try {
 				const msgToSave = await Message.create({
 					content: msg.content,
@@ -21,7 +19,11 @@ const handel = (io) => {
 						break;
 
 					default:
-						io.to(session.socketId).emit("private", msgToSave);
+						let logins = [msg.to, socket.request.user.login];
+						logins.sort();
+						let room = logins.join("");
+						socket.join(room);
+						io.in(room).emit("private", { ...msgToSave._doc, room });
 						break;
 				}
 			} catch (e) {
