@@ -5,7 +5,14 @@ import Cookies from "js-cookie";
 export const useUserStore = defineStore("user", {
 	state: () => ({
 		user: null,
+		users: [],
 	}),
+
+	getters: {
+		differentUser(state) {
+			return state.users.filter((u) => u.login !== state.user.login);
+		},
+	},
 
 	actions: {
 		async logIn(login, password) {
@@ -37,9 +44,12 @@ export const useUserStore = defineStore("user", {
 				login,
 				password,
 			});
-			const user = res.data;
+		},
+		async getAll() {
+			const res = await api().get(`/users`);
+			const users = res.data;
 
-			this.user = user;
+			this.users = users;
 		},
 	},
 });
