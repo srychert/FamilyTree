@@ -58,7 +58,7 @@ const updateOthersColor = (newColor) => {
 }
 
 .color-picker {
-	min-height: 300px;
+	min-height: 400px;
 	max-width: 4rem;
 	overflow: auto;
 	resize: vertical;

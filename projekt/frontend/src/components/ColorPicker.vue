@@ -34,7 +34,7 @@ const updateColorByInput = (e) => {
 <template>
 	<div class="color-picker">
 		<div class="colors">
-			<div v-for="i in 359" :style="{ backgroundColor: `hsl(${i}, 100%, 50%)` }" @click="updateColorByClick(i)"></div>
+			<div v-for="i in 359" :style="{ backgroundColor: `hsla(${i}, 100%, 50%, 0.3)` }" @click="updateColorByClick(i)"></div>
 		</div>
 		<input type="number" :value="pickedColor" @input="updateColorByInput" />
 	</div>
