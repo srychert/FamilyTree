@@ -54,7 +54,7 @@ const goToProfile = () => router.push("/profile");
 	left: 0;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
 	.sidebar {
 		position: absolute;
 	}
@@ -73,7 +73,7 @@ const goToProfile = () => router.push("/profile");
 	left: 1em;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 900px) {
 	.burger {
 		display: none;
 	}
