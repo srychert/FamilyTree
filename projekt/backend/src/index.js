@@ -66,6 +66,8 @@ const users = require("./routes/users");
 app.use("/users", users);
 const auth = require("./routes/auth");
 app.use("/", auth);
+const chat = require("./routes/chat");
+app.use("/chat", chat);
 
 // connect to mongodb
 mongoose
