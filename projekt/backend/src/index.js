@@ -68,6 +68,8 @@ const auth = require("./routes/auth");
 app.use("/", auth);
 const chat = require("./routes/chat");
 app.use("/chat", chat);
+const tree = require("./routes/tree");
+app.use("/tree", tree);
 
 // connect to mongodb
 mongoose
