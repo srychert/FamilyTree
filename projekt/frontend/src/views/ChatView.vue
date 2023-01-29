@@ -30,33 +30,29 @@ const getCookieColor = (from) => {
 	return cookie;
 };
 
-const getMsgClass = (from) => {
-	return from === userStore.user.login ? "user-msg" : "other-msg";
-};
-
-function getRoom() {
-	let logins = [selectedChat.value, userStore?.user?.login];
-	logins.sort();
-	return logins.join("");
-}
-
+const currentRoom = ref("all");
 const selectedChat = ref("all");
+
 const handelSelect = () => {
-	SocketioService.joinRoom(getRoom());
 	if (selectedChat.value == "all") {
+		currentRoom.value = "all";
 		chatStore.getAll();
 	} else {
-		chatStore.getPrivate(selectedChat.value, getRoom());
+		let logins = [selectedChat.value, userStore?.user?.login];
+		logins.sort();
+		currentRoom.value = logins.join("");
+
+		chatStore.getPrivate(selectedChat.value, currentRoom.value);
 	}
-};
 
-const getChat = () => {
-	if (selectedChat.value === "all") return chatStore.chat.all;
-
-	return chatStore.chat[getRoom()];
+	SocketioService.joinRoom(currentRoom.value);
 };
 
 const myMsg = ref("");
+
+const getMsgClass = (from) => {
+	return from === userStore.user.login ? "user-msg" : "other-msg";
+};
 
 const sendMsg = () => {
 	SocketioService.sendMsg({
@@ -78,7 +74,7 @@ const sendMsg = () => {
 	</h1>
 	<div class="chat">
 		<div class="messages">
-			<ChatMessage v-for="{ id, from, to, content, dateSend } in getChat()" :key="id" :class="getMsgClass(from)" class="chat-msg" :color="getCookieColor(from)" :sender="from" :date="dateSend">
+			<ChatMessage v-for="{ id, from, to, content, dateSend } in chatStore.chat[currentRoom]" :key="id" :class="getMsgClass(from)" class="chat-msg" :color="getCookieColor(from)" :sender="from" :date="dateSend">
 				{{ content }}
 			</ChatMessage>
 		</div>

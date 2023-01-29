@@ -1,4 +1,6 @@
 <script setup>
+import { computed } from "@vue/reactivity";
+
 const props = defineProps({
 	color: {
 		type: Number,
@@ -14,7 +16,7 @@ const props = defineProps({
 	},
 });
 
-const dateSend = new Date(props.date).toLocaleString();
+const dateSend = computed(() => new Date(props.date).toLocaleString());
 </script>
 
 <template>
