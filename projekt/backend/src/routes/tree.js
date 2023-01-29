@@ -35,6 +35,7 @@ router.get("/", hasRoles("ADMIN", "USER"), async (req, res) => {
 		})
 		.catch((error) => {
 			console.log(error);
+			return res.status(500).send(error);
 		})
 		.then(() => {
 			session.close();
@@ -53,11 +54,11 @@ router.post("/", hasRoles("ADMIN", "USER"), async (req, res) => {
 		.map(([k, _]) => k);
 
 	if (emptyFields.length > 0) {
-		return res.status(500).send(`Fields ${JSON.stringify(emptyFields)} are required`);
+		return res.status(400).send(`Fields ${JSON.stringify(emptyFields)} are required`);
 	}
 
 	if (!dateIsValid(dateOfBirth)) {
-		return res.status(500).send("Wrong date format. Send string yyyy-mm-dd");
+		return res.status(400).send("Wrong date format. Send string yyyy-mm-dd");
 	}
 
 	const login = req.user.login;
@@ -86,10 +87,106 @@ router.post("/", hasRoles("ADMIN", "USER"), async (req, res) => {
 		})
 		.catch((error) => {
 			console.log(error);
+			return res.status(500).send(error);
 		})
 		.then(() => {
 			session.close();
 			return res.send(tree);
+		});
+});
+
+// Get ancestors of level
+router.get("/:personId", hasRoles("ADMIN", "USER"), async (req, res) => {
+	const session = driver.session();
+	const personId = parseInt(req.params.personId);
+	const level = parseInt(req.query.level);
+
+	if (isNaN(personId) || isNaN(level)) {
+		return res.status(400).send("'personId' and 'level' must be an Integer");
+	}
+
+	const response = [];
+	session
+		.run(
+			`MATCH (p:Person)-[:PARENT*${level}..${level}]->(c:Person)
+			WHERE ID(c) = $personId
+			RETURN p`,
+			{
+				personId,
+			}
+		)
+		.then((result) => {
+			result.records.forEach((record) => {
+				const person = record.get("p");
+				response.push({
+					...person.properties,
+					id: person.identity,
+				});
+			});
+		})
+		.catch((error) => {
+			console.log(error);
+			return res.status(500).send(error);
+		})
+		.then(() => {
+			session.close();
+			return res.send(response);
+		});
+});
+
+// Add parent to person of id === childId
+router.post("/:childId", hasRoles("ADMIN", "USER"), async (req, res) => {
+	const session = driver.session();
+	const childId = parseInt(req.params.childId);
+
+	if (isNaN(childId)) {
+		return res.status(400).send("'childId' must be an Integer");
+	}
+
+	const { firstName, lastName, dateOfBirth } = req.body;
+
+	const emptyFields = Object.entries({ firstName, lastName, dateOfBirth })
+		.filter(([_, v]) => v === undefined)
+		.map(([k, _]) => k);
+
+	if (emptyFields.length > 0) {
+		return res.status(400).send(`Fields ${JSON.stringify(emptyFields)} are required`);
+	}
+
+	if (!dateIsValid(dateOfBirth)) {
+		return res.status(400).send("Wrong date format. Send string yyyy-mm-dd");
+	}
+
+	const response = [];
+	session
+		.run(
+			`MATCH (child:Person)
+			WHERE ID(child) = $childId
+			MERGE (p:Person {firstName: $firstName, lastName: $lastName, dateOfBirth: $dateOfBirth})-[:PARENT]->(child)
+			RETURN p`,
+			{
+				childId,
+				firstName,
+				lastName,
+				dateOfBirth,
+			}
+		)
+		.then((result) => {
+			result.records.forEach((record) => {
+				const person = record.get("p");
+				response.push({
+					...person.properties,
+					id: person.identity,
+				});
+			});
+		})
+		.catch((error) => {
+			console.log(error);
+			return res.status(500).send(error);
+		})
+		.then(() => {
+			session.close();
+			return res.send(response);
 		});
 });
 
