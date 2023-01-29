@@ -30,6 +30,11 @@ const router = createRouter({
 			component: () => import("../views/ProfileView.vue"),
 		},
 		{
+			path: "/tree",
+			name: "tree",
+			component: () => import("../views/TreeView.vue"),
+		},
+		{
 			path: "/chat",
 			name: "chat",
 			component: () => import("../views/ChatView.vue"),

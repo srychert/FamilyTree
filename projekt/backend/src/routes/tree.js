@@ -14,12 +14,12 @@ function dateIsValid(dateStr) {
 	return d instanceof Date && isFinite(d);
 }
 
-// Get all persons from logged in user tree
+// Get owner of tree
 router.get("/", hasRoles("ADMIN", "USER"), async (req, res) => {
 	const session = driver.session();
 	const login = req.user.login;
 
-	const response = [];
+	let response = {};
 	session
 		.run("MATCH (t: Tree {owner: $login})<-[:IN]-(p: Person) Return p", {
 			login,
@@ -27,10 +27,10 @@ router.get("/", hasRoles("ADMIN", "USER"), async (req, res) => {
 		.then((result) => {
 			result.records.forEach((record) => {
 				const person = record.get("p");
-				response.push({
+				response = {
 					...person.properties,
-					id: person.identity,
-				});
+					id: person.identity.low,
+				};
 			});
 		})
 		.catch((error) => {
@@ -62,7 +62,7 @@ router.post("/", hasRoles("ADMIN", "USER"), async (req, res) => {
 	}
 
 	const login = req.user.login;
-	let tree = {};
+	let response = {};
 
 	session
 		.run(
@@ -71,7 +71,7 @@ router.post("/", hasRoles("ADMIN", "USER"), async (req, res) => {
                 SET 
                     t.owner = $owner 
                     MERGE (t)<-[:IN]-(p:Person {login: $owner, firstName: $firstName, lastName: $lastName, dateOfBirth: $dateOfBirth})
-            RETURN t`,
+            RETURN p`,
 			{
 				treeName: `${login}-tree`,
 				owner: login,
@@ -82,7 +82,11 @@ router.post("/", hasRoles("ADMIN", "USER"), async (req, res) => {
 		)
 		.then((result) => {
 			result.records.forEach((record) => {
-				tree = record.get("t");
+				const person = record.get("p");
+				response = {
+					...person.properties,
+					id: person.identity.low,
+				};
 			});
 		})
 		.catch((error) => {
@@ -91,7 +95,7 @@ router.post("/", hasRoles("ADMIN", "USER"), async (req, res) => {
 		})
 		.then(() => {
 			session.close();
-			return res.send(tree);
+			return res.send(response);
 		});
 });
 
@@ -120,7 +124,7 @@ router.get("/:personId", hasRoles("ADMIN", "USER"), async (req, res) => {
 				const person = record.get("p");
 				response.push({
 					...person.properties,
-					id: person.identity,
+					id: person.identity.low,
 				});
 			});
 		})
@@ -176,7 +180,7 @@ router.post("/:childId", hasRoles("ADMIN", "USER"), async (req, res) => {
 				const person = record.get("p");
 				response.push({
 					...person.properties,
-					id: person.identity,
+					id: person.identity.low,
 				});
 			});
 		})
