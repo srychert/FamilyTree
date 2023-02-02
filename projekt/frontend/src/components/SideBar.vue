@@ -38,6 +38,7 @@ const goToProfile = () => router.push("/profile");
 <style scoped>
 .sidebar {
 	height: 100vh;
+	min-width: 300px;
 	width: clamp(300px, 30vw, 400px);
 	border: 1px solid var(--light);
 	background: black;

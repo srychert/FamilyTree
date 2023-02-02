@@ -161,12 +161,12 @@ router.post("/:childId", hasRoles("ADMIN", "USER"), async (req, res) => {
 		return res.status(400).send("Wrong date format. Send string yyyy-mm-dd");
 	}
 
-	const response = [];
+	let response = {};
 	session
 		.run(
 			`MATCH (child:Person)
 			WHERE ID(child) = $childId
-			MERGE (p:Person {firstName: $firstName, lastName: $lastName, dateOfBirth: $dateOfBirth})-[:PARENT]->(child)
+			MERGE (p:Person {childId: $childId, firstName: $firstName, lastName: $lastName, dateOfBirth: $dateOfBirth})-[:PARENT]->(child)
 			RETURN p`,
 			{
 				childId,
@@ -178,10 +178,10 @@ router.post("/:childId", hasRoles("ADMIN", "USER"), async (req, res) => {
 		.then((result) => {
 			result.records.forEach((record) => {
 				const person = record.get("p");
-				response.push({
+				response = {
 					...person.properties,
 					id: person.identity.low,
-				});
+				};
 			});
 		})
 		.catch((error) => {

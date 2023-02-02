@@ -121,8 +121,4 @@ const sendMsg = () => {
 .user-msg {
 	align-self: flex-end;
 }
-
-.chat-input {
-	width: 100%;
-}
 </style>

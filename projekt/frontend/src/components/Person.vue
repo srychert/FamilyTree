@@ -31,7 +31,7 @@ const props = defineProps({
 .person {
 	display: flex;
 	flex-direction: column;
-	width: fit-content;
+	justify-content: center;
 	padding: 1em;
 	border: 1px solid;
 }

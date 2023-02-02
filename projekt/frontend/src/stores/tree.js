@@ -26,12 +26,34 @@ export const useTreeStore = defineStore("tree", {
 			const res = await api().get(`/tree/${personId}?level=${level}`);
 			const parents = res.data;
 
-			this.tree[level] = parents;
+			const parentsByChildId = parents.reduce((acc, parent) => {
+				const newAcc = acc[parent.childId] ? { ...acc, [parent.childId]: [...acc[parent.childId], { ...parent, active: false }] } : { ...acc, [parent.childId]: [{ ...parent, active: false }] };
+
+				// ugly but works
+				if (newAcc[parent.childId].length === 1) {
+					newAcc[parent.childId][0].active = true;
+				}
+				if (newAcc[parent.childId].length === 2) {
+					newAcc[parent.childId][1].active = true;
+				}
+				return newAcc;
+			}, {});
+
+			this.tree[level] = parentsByChildId;
 		},
 		async addParent(childId, level, parent) {
 			const res = await api().post(`/tree/${childId}`, parent);
 			const newParent = res.data;
 			this.tree[level] ? this.tree[level].push(newParent) : (this.tree[level] = [newParent]);
+		},
+		setParentAsActive(level, childId, previousParentId, parentId) {
+			const indexPrev = this.tree[level][childId].findIndex((parent) => parent.id == previousParentId);
+			this.tree[level][childId][indexPrev].active = false;
+
+			const indexNew = this.tree[level][childId].findIndex((parent) => parent.id == parentId);
+			this.tree[level][childId][indexNew].active = true;
+
+			console.log(this.tree[level][childId]);
 		},
 	},
 });
