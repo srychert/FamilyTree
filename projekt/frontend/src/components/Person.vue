@@ -1,19 +1,7 @@
 <script setup>
 const props = defineProps({
-	id: {
-		type: Number,
-		required: true,
-	},
-	firstName: {
-		type: String,
-		required: true,
-	},
-	lastName: {
-		type: String,
-		required: true,
-	},
-	dateOfBirth: {
-		type: String,
+	person: {
+		type: Object,
 		required: true,
 	},
 });
@@ -21,9 +9,9 @@ const props = defineProps({
 
 <template>
 	<div class="person" @click="showMenu">
-		<span>{{ firstName }}</span>
-		<span>{{ lastName }}</span>
-		<span class="dob">{{ dateOfBirth }}</span>
+		<span>{{ person.firstName }}</span>
+		<span>{{ person.lastName }}</span>
+		<span class="dob">{{ person.dateOfBirth }}</span>
 	</div>
 </template>
 

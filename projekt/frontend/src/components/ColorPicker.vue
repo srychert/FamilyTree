@@ -57,6 +57,7 @@ const updateColorByInput = (e) => {
 	border: 2px solid var(--light);
 	border-radius: 1rem 1rem 0% 0%;
 	overflow: hidden;
+	min-height: 361px;
 }
 
 .color-picker > .colors > div {

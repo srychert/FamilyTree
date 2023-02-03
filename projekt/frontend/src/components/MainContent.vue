@@ -12,5 +12,6 @@ import { RouterView } from "vue-router";
 main {
 	flex: 1;
 	padding: 2.5rem 2rem 0 2rem;
+	overflow: hidden;
 }
 </style>

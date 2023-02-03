@@ -104,7 +104,7 @@ const sendMsg = () => {
 }
 
 .messages {
-	height: calc(100vh - 80px - 6rem);
+	height: calc(100vh - 87px - 6rem);
 	overflow: auto;
 	overflow-x: hidden;
 	display: flex;
