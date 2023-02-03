@@ -3,10 +3,12 @@ import { onMounted, ref } from "vue";
 import { useTreeStore } from "@/stores/tree";
 import CreateTreeForm from "@/components/CreateTreeForm.vue";
 import Person from "@/components/Person.vue";
+import ContextMenu from "@/components/ContextMenu.vue";
 
 const treeStore = useTreeStore();
 // 2*currentMaxLevel = number of parent nodes in column
 const currentMaxLevel = ref(4);
+const contextMenuRef = ref(null);
 
 onMounted(() => {
 	treeStore.getOwner().then((_) => {
@@ -19,7 +21,7 @@ onMounted(() => {
 });
 
 const handelLoadNextLevel = () => {
-	// treeStore.getParents(treeStore.owner.id, currentMaxLevel.value).then((_) => (currentMaxLevel.value += 1));
+	treeStore.getParents(treeStore.owner.id, currentMaxLevel.value).then((_) => (currentMaxLevel.value += 1));
 
 	// testing change active
 	// level, childId, previousParentId, parentId
@@ -31,11 +33,11 @@ const handelLoadNextLevel = () => {
 	<CreateTreeForm v-if="Object.keys(treeStore.owner).length === 0" />
 
 	<div v-else class="tree">
-		<div class="column" v-for="(parents, level) in treeStore.tree" :style="`grid-template-rows: repeat(${2 ** Number.parseInt(level)}, minmax(0, 1fr))`">
-			<Person v-if="level == 0" v-for="person in parents" :id="person.id" :firstName="person.firstName" :lastName="person.lastName" :dateOfBirth="person.dateOfBirth" />
+		<div class="column" v-for="(parents, level) in treeStore.getActive" :style="`grid-template-rows: repeat(${2 ** Number.parseInt(level)}, minmax(0, 1fr))`">
+			<Person v-if="level == 0" v-for="person in parents" @click="(e) => contextMenuRef.toggle(e)" :person="person" :id="person.id" />
 			<template v-for="personList in parents">
 				<template v-for="person in personList">
-					<Person v-if="person.active" :id="person.id" :firstName="person.firstName" :lastName="person.lastName" :dateOfBirth="person.dateOfBirth" />
+					<Person v-if="person.active" @click="(e) => contextMenuRef.toggle(e)" :person="person" :id="person.id" />
 				</template>
 			</template>
 		</div>
@@ -43,6 +45,8 @@ const handelLoadNextLevel = () => {
 			<button class="load-more material-symbols-outlined" @click="handelLoadNextLevel">add_circle</button>
 		</div>
 	</div>
+
+	<ContextMenu ref="contextMenuRef" :items="[1, 2, 3]"></ContextMenu>
 </template>
 
 <style scoped>

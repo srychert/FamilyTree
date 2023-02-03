@@ -7,6 +7,39 @@ export const useTreeStore = defineStore("tree", {
 		tree: {},
 	}),
 
+	getters: {
+		getActive(state) {
+			let active = {};
+			let prev = [];
+			for (const [level, persons] of Object.entries(state.tree)) {
+				if (level == 0) {
+					active[level] = persons;
+					prev = [persons[0].id];
+					continue;
+				}
+
+				let newPrev = [];
+
+				const newLevel = prev.reduce((acc, curr) => {
+					if (!persons[curr]) {
+						return acc;
+					}
+
+					let parents = persons[curr].filter((p) => p.active);
+					newPrev = [...parents.map((p) => p.id), ...newPrev];
+
+					acc[curr] = parents;
+					return acc;
+				}, {});
+
+				active[level] = newLevel;
+				prev = newPrev;
+			}
+
+			return active;
+		},
+	},
+
 	actions: {
 		async createTree(ownerData) {
 			const res = await api().post(`/tree`, ownerData);
