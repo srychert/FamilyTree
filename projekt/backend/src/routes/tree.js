@@ -166,7 +166,12 @@ router.post("/:childId", hasRoles("ADMIN", "USER"), async (req, res) => {
 		.run(
 			`MATCH (child:Person)
 			WHERE ID(child) = $childId
-			MERGE (p:Person {childId: $childId, firstName: $firstName, lastName: $lastName, dateOfBirth: $dateOfBirth})-[:PARENT]->(child)
+			MERGE (p:Person {firstName: $firstName, lastName: $lastName, dateOfBirth: $dateOfBirth})
+			ON CREATE
+  				SET p.childId = $childId
+			ON MATCH
+  				SET p.childId = $childId
+			MERGE (p)-[:PARENT]->(child)
 			RETURN p`,
 			{
 				childId,
@@ -191,6 +196,33 @@ router.post("/:childId", hasRoles("ADMIN", "USER"), async (req, res) => {
 		.then(() => {
 			session.close();
 			return res.send(response);
+		});
+});
+
+router.delete("/:personId", hasRoles("ADMIN", "USER"), async (req, res) => {
+	const session = driver.session();
+	const personId = parseInt(req.params.personId);
+
+	if (isNaN(personId)) {
+		return res.status(400).send("'personId' must be an Integer");
+	}
+
+	session
+		.run(
+			`MATCH (p:Person)
+			WHERE ID(p) = $personId
+			DETACH DELETE p`,
+			{
+				personId,
+			}
+		)
+		.catch((error) => {
+			console.log(error);
+			return res.status(500).send(error);
+		})
+		.then(() => {
+			session.close();
+			return res.send(200);
 		});
 });
 

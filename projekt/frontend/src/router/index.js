@@ -39,6 +39,12 @@ const router = createRouter({
 			name: "chat",
 			component: () => import("../views/ChatView.vue"),
 		},
+		{
+			path: "/add-parent",
+			name: "add-parent",
+			props: true,
+			component: () => import("../views/AddParentView.vue"),
+		},
 	],
 });
 

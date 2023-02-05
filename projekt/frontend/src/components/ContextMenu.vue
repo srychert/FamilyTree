@@ -2,6 +2,9 @@
 import { ref, computed } from "vue";
 import { useTreeStore } from "@/stores/tree";
 import MenuAside from "@/components/MenuAside.vue";
+import { RouterLink, useRouter } from "vue-router";
+
+const router = useRouter();
 
 const treeStore = useTreeStore();
 
@@ -35,8 +38,16 @@ const items = computed(() => [
 		  }
 		: null,
 	{
-		content: "Test",
-		action: () => {},
+		content: "Add parent",
+		action: () => {
+			router.push({ name: "add-parent", query: { childId: person.value.id, level: level.value } });
+		},
+	},
+	{
+		content: "Delete",
+		action: () => {
+			treeStore.deletePerson(person.value.id).then((_) => router.go());
+		},
 	},
 ]);
 
