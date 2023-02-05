@@ -22,10 +22,11 @@ onMounted(() => {
 
 const handelLoadNextLevel = () => {
 	treeStore.getParents(treeStore.owner.id, currentMaxLevel.value).then((_) => (currentMaxLevel.value += 1));
+};
 
-	// testing change active
-	// level, childId, previousParentId, parentId
-	treeStore.setParentAsActive(1, 1, 3, 5);
+const handelMenuClick = (e, level, person) => {
+	const others = level != 0 ? treeStore.getOtherParents(level, person.childId, person.id) : [];
+	contextMenuRef.value.toggle(e, level, person, others);
 };
 </script>
 
@@ -34,10 +35,11 @@ const handelLoadNextLevel = () => {
 
 	<div v-else class="tree">
 		<div class="column" v-for="(parents, level) in treeStore.getActive" :style="`grid-template-rows: repeat(${2 ** Number.parseInt(level)}, minmax(0, 1fr))`">
-			<Person v-if="level == 0" v-for="person in parents" @click="(e) => contextMenuRef.toggle(e)" :person="person" :id="person.id" />
+			<Person v-if="level == 0" v-for="person in parents" @click="(e) => handelMenuClick(e, level, person)" :person="person" :id="person.id" />
 			<template v-for="personList in parents">
 				<template v-for="person in personList">
-					<Person v-if="person.active" @click="(e) => contextMenuRef.toggle(e)" :person="person" :id="person.id" />
+					<Person v-if="person?.active" :person="person" @click="(e) => handelMenuClick(e, level, person)" />
+					<Person v-else v-if="level != 0" :person="{}" />
 				</template>
 			</template>
 		</div>
@@ -46,7 +48,7 @@ const handelLoadNextLevel = () => {
 		</div>
 	</div>
 
-	<ContextMenu ref="contextMenuRef" :items="[1, 2, 3]"></ContextMenu>
+	<ContextMenu ref="contextMenuRef"></ContextMenu>
 </template>
 
 <style scoped>
@@ -64,7 +66,7 @@ const handelLoadNextLevel = () => {
 
 .column {
 	padding: 16px;
-	outline: 1px solid hsl(100, 100%, 60%);
+	outline: 1px solid hsl(100, 100%, 40%);
 	display: grid;
 }
 

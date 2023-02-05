@@ -9,9 +9,9 @@ const props = defineProps({
 
 <template>
 	<div class="person" @click="showMenu">
-		<span>{{ person.firstName }}</span>
-		<span>{{ person.lastName }}</span>
-		<span class="dob">{{ person.dateOfBirth }}</span>
+		<span>{{ person?.firstName }}</span>
+		<span>{{ person?.lastName }}</span>
+		<span class="dob">{{ person?.dateOfBirth }}</span>
 	</div>
 </template>
 
