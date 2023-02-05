@@ -52,7 +52,7 @@ const items = computed(() => [
 	{
 		content: "Delete",
 		action: () => {
-			treeStore.deletePerson(person.value.id).then((_) => router.go());
+			treeStore.deletePerson(level.value, person.value.childId, person.value.id).then((_) => (isOpen.value = false));
 		},
 	},
 ]);

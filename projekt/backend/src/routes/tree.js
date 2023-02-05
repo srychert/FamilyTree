@@ -138,6 +138,43 @@ router.get("/:personId", hasRoles("ADMIN", "USER"), async (req, res) => {
 		});
 });
 
+router.get("/person/:personId", hasRoles("ADMIN", "USER"), async (req, res) => {
+	const session = driver.session();
+	const personId = parseInt(req.params.personId);
+
+	if (isNaN(personId)) {
+		return res.status(400).send("'personId' must be an Integer");
+	}
+
+	let response = {};
+	session
+		.run(
+			`MATCH (p:Person)
+			WHERE ID(p) = $personId
+			RETURN p`,
+			{
+				personId,
+			}
+		)
+		.then((result) => {
+			result.records.forEach((record) => {
+				const person = record.get("p");
+				response = {
+					...person.properties,
+					id: person.identity.low,
+				};
+			});
+		})
+		.catch((error) => {
+			console.log(error);
+			return res.status(500).send(error);
+		})
+		.then(() => {
+			session.close();
+			return res.send(response);
+		});
+});
+
 // Add parent to person of id === childId
 router.post("/:childId", hasRoles("ADMIN", "USER"), async (req, res) => {
 	const session = driver.session();
@@ -242,7 +279,7 @@ router.patch("/:personId", hasRoles("ADMIN", "USER"), async (req, res) => {
 		})
 		.then(() => {
 			session.close();
-			return res.send(200);
+			return res.sendStatus(200);
 		});
 });
 
@@ -269,8 +306,9 @@ router.delete("/:personId", hasRoles("ADMIN", "USER"), async (req, res) => {
 		})
 		.then(() => {
 			session.close();
-			return res.send(200);
+			return res.sendStatus(200);
 		});
 });
 
 module.exports = router;
+	

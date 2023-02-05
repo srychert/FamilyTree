@@ -1,6 +1,6 @@
 <script setup>
 import { useRoute, useRouter } from "vue-router";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useTreeStore } from "@/stores/tree";
 import PersonForm from "../components/PersonForm.vue";
 
@@ -9,11 +9,18 @@ const route = useRoute();
 
 const treeStore = useTreeStore();
 
-// TODO get default values
 const firstName = ref("");
 const lastName = ref("");
 const dateOfBirth = ref("");
 const errorText = ref("");
+
+onMounted(() => {
+	treeStore.getPerson(route.query.personId).then((p) => {
+		firstName.value = p.firstName;
+		lastName.value = p.lastName;
+		dateOfBirth.value = p.dateOfBirth;
+	});
+});
 
 const handelEditParent = () => {
 	treeStore
@@ -36,7 +43,7 @@ const handelEditParent = () => {
 
 <template>
 	<h1>Edit parent</h1>
-	<PersonForm v-model:firstName="firstName" v-model:lastName="lastName" v-model:dateOfBirth="dateOfBirth" v-model:handelSubmit="handelEditParent" inputText="Edit parent" :errorText="errorText"></PersonForm>
+	<PersonForm v-model:firstName="firstName" v-model:lastName="lastName" v-model:dateOfBirth="dateOfBirth" v-model:handelSubmit="handelEditParent" inputText="Edit" :errorText="errorText"></PersonForm>
 </template>
 
 <style scoped></style>
