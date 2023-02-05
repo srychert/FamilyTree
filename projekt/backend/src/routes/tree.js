@@ -199,6 +199,53 @@ router.post("/:childId", hasRoles("ADMIN", "USER"), async (req, res) => {
 		});
 });
 
+router.patch("/:personId", hasRoles("ADMIN", "USER"), async (req, res) => {
+	const session = driver.session();
+	const personId = parseInt(req.params.personId);
+
+	if (isNaN(personId)) {
+		return res.status(400).send("'personId' must be an Integer");
+	}
+
+	const { firstName, lastName, dateOfBirth } = req.body;
+
+	const emptyFields = Object.entries({ firstName, lastName, dateOfBirth })
+		.filter(([_, v]) => v === undefined)
+		.map(([k, _]) => k);
+
+	if (emptyFields.length > 0) {
+		return res.status(400).send(`Fields ${JSON.stringify(emptyFields)} are required`);
+	}
+
+	if (!dateIsValid(dateOfBirth)) {
+		return res.status(400).send("Wrong date format. Send string yyyy-mm-dd");
+	}
+
+	session
+		.run(
+			`MATCH (p:Person)
+			WHERE ID(p) = $personId
+			SET p.firstName = $firstName
+			SET p.lastName = $lastName
+			SET p.dateOfBirth = $dateOfBirth
+			RETURN p`,
+			{
+				personId,
+				firstName,
+				lastName,
+				dateOfBirth,
+			}
+		)
+		.catch((error) => {
+			console.log(error);
+			return res.status(500).send(error);
+		})
+		.then(() => {
+			session.close();
+			return res.send(200);
+		});
+});
+
 router.delete("/:personId", hasRoles("ADMIN", "USER"), async (req, res) => {
 	const session = driver.session();
 	const personId = parseInt(req.params.personId);

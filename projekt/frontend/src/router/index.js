@@ -45,6 +45,12 @@ const router = createRouter({
 			props: true,
 			component: () => import("../views/AddParentView.vue"),
 		},
+		{
+			path: "/edit-person",
+			name: "edit-person",
+			props: true,
+			component: () => import("../views/EditPersonView.vue"),
+		},
 	],
 });
 

@@ -9,14 +9,15 @@ const route = useRoute();
 
 const treeStore = useTreeStore();
 
+// TODO get default values
 const firstName = ref("");
 const lastName = ref("");
 const dateOfBirth = ref("");
 const errorText = ref("");
 
-const handleAddParent = () => {
+const handelEditParent = () => {
 	treeStore
-		.addParent(route.query.childId, {
+		.editPerson(route.query.personId, {
 			firstName: firstName.value,
 			lastName: lastName.value,
 			dateOfBirth: dateOfBirth.value,
@@ -34,8 +35,8 @@ const handleAddParent = () => {
 </script>
 
 <template>
-	<h1>Add parent</h1>
-	<PersonForm v-model:firstName="firstName" v-model:lastName="lastName" v-model:dateOfBirth="dateOfBirth" v-model:handelSubmit="handleAddParent" inputText="Add parent" :errorText="errorText"></PersonForm>
+	<h1>Edit parent</h1>
+	<PersonForm v-model:firstName="firstName" v-model:lastName="lastName" v-model:dateOfBirth="dateOfBirth" v-model:handelSubmit="handelEditParent" inputText="Edit parent" :errorText="errorText"></PersonForm>
 </template>
 
 <style scoped></style>

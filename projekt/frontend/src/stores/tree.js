@@ -86,8 +86,11 @@ export const useTreeStore = defineStore("tree", {
 		async addParent(childId, parent) {
 			await api().post(`/tree/${childId}`, parent);
 		},
+		async editPerson(personId, person) {
+			await api().patch(`/tree/${personId}`, person);
+		},
 		async deletePerson(personId) {
-			const res = await api().delete(`/tree/${personId}`);
+			await api().delete(`/tree/${personId}`);
 		},
 		setParentAsActive(level, childId, previousParentId, parentId) {
 			const indexPrev = this.tree[level][childId].findIndex((parent) => parent.id == previousParentId);

@@ -44,6 +44,12 @@ const items = computed(() => [
 		},
 	},
 	{
+		content: "Edit",
+		action: () => {
+			router.push({ name: "edit-person", query: { personId: person.value.id, level: level.value } });
+		},
+	},
+	{
 		content: "Delete",
 		action: () => {
 			treeStore.deletePerson(person.value.id).then((_) => router.go());
