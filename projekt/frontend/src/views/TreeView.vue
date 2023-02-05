@@ -35,12 +35,9 @@ const handelMenuClick = (e, level, person) => {
 
 	<div v-else class="tree">
 		<div class="column" v-for="(parents, level) in treeStore.getActive" :style="`grid-template-rows: repeat(${2 ** Number.parseInt(level)}, minmax(0, 1fr))`">
-			<Person v-if="level == 0" v-for="person in parents" @click="(e) => handelMenuClick(e, level, person)" :person="person" :id="person.id" />
-			<template v-for="personList in parents">
-				<template v-for="person in personList">
-					<Person v-if="person?.active" :person="person" @click="(e) => handelMenuClick(e, level, person)" />
-					<Person v-else v-if="level != 0" :person="{}" />
-				</template>
+			<template v-for="person in parents">
+				<Person v-if="person?.active" :person="person" @click="(e) => handelMenuClick(e, level, person)" />
+				<Person v-else v-if="level != 0" :person="{}" />
 			</template>
 		</div>
 		<div class="column">

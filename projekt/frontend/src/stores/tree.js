@@ -10,49 +10,36 @@ export const useTreeStore = defineStore("tree", {
 	getters: {
 		getActive(state) {
 			let active = {};
-			let prev = [];
+			let prevPositions = {};
+
 			for (const [level, persons] of Object.entries(state.tree)) {
+				const currentParents = Array.from(Array(2 ** level));
+
 				if (level == 0) {
 					active[level] = persons;
-					prev = [persons[0].id];
+					prevPositions = { [persons[0].id]: 0 };
 					continue;
 				}
 
-				let newPrev = [];
+				let newPrevPositions = {};
 
-				// console.log(prev);
+				for (const [childId, position] of Object.entries(prevPositions)) {
+					// get active parents
+					const parents = state.tree[level][childId] ? state.tree[level][childId].filter((p) => p.active) : [];
 
-				let i = 100;
+					// add active parents or undefined to currentParents array at calculated positions
+					for (let i = 0; i < 2; i++) {
+						const pos = position * 2 + i;
+						currentParents[pos] = parents[i];
 
-				const newLevel = prev.reduce((acc, curr, index) => {
-					console.log(level, curr);
-					let parents = persons[curr] ? persons[curr].filter((p) => p.active) : [];
-
-					while (parents.length < 2) {
-						parents.push(null);
+						if (parents[i]) {
+							newPrevPositions[parents[i].id] = pos;
+						}
 					}
+				}
 
-					newPrev = [...newPrev, ...parents.map((p) => p?.id)];
-
-					// console.log("newPrev", newPrev);
-					// console.log("parents", parents);
-
-					if (curr) {
-						acc[curr] = parents;
-					}
-					// else {
-					// 	acc[i++] = [null, null];
-					// 	console.log(acc);
-					// }
-
-					return acc;
-				}, {});
-
-				// console.log(newPrev);
-
-				active[level] = newLevel;
-
-				prev = newPrev;
+				active[level] = currentParents;
+				prevPositions = newPrevPositions;
 			}
 
 			return active;
@@ -71,14 +58,14 @@ export const useTreeStore = defineStore("tree", {
 			const owner = res.data;
 
 			this.owner = owner;
-			this.tree[0] = [owner];
+			this.tree[0] = [{ ...owner, active: true }];
 		},
 		async getOwner() {
 			const res = await api().get(`/tree`);
 			const owner = res.data;
 
 			this.owner = owner;
-			this.tree[0] = [owner];
+			this.tree[0] = [{ ...owner, active: true }];
 		},
 		async getParents(personId, level) {
 			const res = await api().get(`/tree/${personId}?level=${level}`);
