@@ -115,7 +115,7 @@ router.post("/", hasRoles("ADMIN", "USER"), async (req, res) => {
             ON CREATE
                 SET 
                     t.owner = $owner 
-                    MERGE (t)<-[:IN]-(p:Person {login: $owner, firstName: $firstName, lastName: $lastName, dateOfBirth: $dateOfBirth})
+                    MERGE (t)<-[:IN]-(p:Person {login: $owner, active: true, firstName: $firstName, lastName: $lastName, dateOfBirth: $dateOfBirth})
             RETURN p`,
 			{
 				treeName: `${login}-tree`,
@@ -250,7 +250,7 @@ router.post("/:childId", hasRoles("ADMIN", "USER"), async (req, res) => {
 			WHERE ID(child) = $childId
 			MERGE (p:Person {firstName: $firstName, lastName: $lastName, dateOfBirth: $dateOfBirth})
 			ON CREATE
-  				SET p.childId = $childId
+				SET p += {childId: $childId, active: false}
 			ON MATCH
   				SET p.childId = $childId
 			MERGE (p)-[:PARENT]->(child)
@@ -263,21 +263,53 @@ router.post("/:childId", hasRoles("ADMIN", "USER"), async (req, res) => {
 			}
 		)
 		.then((result) => {
+			let person = {};
 			result.records.forEach((record) => {
-				const person = record.get("p");
-				response = {
+				person = record.get("p");
+				person = {
 					...person.properties,
 					id: person.identity.low,
 				};
+
+				response = person;
 			});
+
+			session
+				.run(
+					`MATCH (child:Person)<-[:PARENT]-(p:Person {active: true})
+					WHERE ID(child) = $childId
+					WITH COUNT(*) AS active_parents
+					MATCH (p:Person)
+					WHERE ID(p) = $personId AND active_parents < 2
+					SET p.active = true
+					RETURN p`,
+					{
+						childId,
+						personId: person.id,
+					}
+				)
+				.then((r) => {
+					r.records.forEach((recordInner) => {
+						let updatedPerson = recordInner.get("p");
+
+						response = {
+							...updatedPerson.properties,
+							id: updatedPerson.identity.low,
+						};
+					});
+				})
+				.catch((error) => {
+					console.log(error);
+					return res.status(500).send(error);
+				})
+				.then(() => {
+					session.close();
+					return res.send(response);
+				});
 		})
 		.catch((error) => {
 			console.log(error);
 			return res.status(500).send(error);
-		})
-		.then(() => {
-			session.close();
-			return res.send(response);
 		});
 });
 
@@ -316,6 +348,42 @@ router.patch("/:personId", hasRoles("ADMIN", "USER"), async (req, res) => {
 				firstName,
 				lastName,
 				dateOfBirth,
+			}
+		)
+		.catch((error) => {
+			console.log(error);
+			return res.status(500).send(error);
+		})
+		.then(() => {
+			session.close();
+			return res.sendStatus(200);
+		});
+});
+
+router.patch("/active/:prevParentId/:parentId", hasRoles("ADMIN", "USER"), async (req, res) => {
+	const session = driver.session();
+	const prevParentId = parseInt(req.params.prevParentId);
+	const parentId = parseInt(req.params.parentId);
+
+	console.log(prevParentId, parentId);
+
+	if (isNaN(prevParentId) || isNaN(parentId)) {
+		return res.status(400).send("'prevParentId' and 'parentId' must be an Integer");
+	}
+
+	session
+		.run(
+			`MATCH (previous:Person {active: true})
+			WHERE ID(previous) = $prevParentId
+			SET previous.active = false
+			WITH previous
+			MATCH (p:Person {active: false})
+			WHERE ID(p) = $parentId
+			SET p.active = true
+			RETURN previous, p`,
+			{
+				prevParentId,
+				parentId,
 			}
 		)
 		.catch((error) => {

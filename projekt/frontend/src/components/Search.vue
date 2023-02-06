@@ -34,7 +34,7 @@ const showTree = (tree) => {
 	emit("selectTree", tree);
 	treeStore.tree = {};
 	treeStore.owner = tree.person;
-	treeStore.tree[0] = [{ ...treeStore.owner, active: true }];
+	treeStore.tree[0] = [treeStore.owner];
 	for (let i = 1; i < props.currentMaxLevel; i++) {
 		treeStore.getParents(tree.person.id, i);
 	}

@@ -59,7 +59,7 @@ export const useTreeStore = defineStore("tree", {
 			const owner = res.data;
 
 			this.owner = owner;
-			this.tree[0] = [{ ...owner, active: true }];
+			this.tree[0] = [owner];
 		},
 		async searchForTrees(name) {
 			const res = await api().get(`/tree`, { params: { name } });
@@ -70,18 +70,14 @@ export const useTreeStore = defineStore("tree", {
 			const owner = res.data;
 
 			this.owner = owner;
-			this.tree[0] = [{ ...owner, active: true }];
+			this.tree[0] = [owner];
 		},
 		async getParents(personId, level) {
 			const res = await api().get(`/tree/${personId}?level=${level}`);
 			const parents = res.data;
 
 			const parentsByChildId = parents.reduce((acc, parent) => {
-				const newAcc = acc[parent.childId] ? { ...acc, [parent.childId]: [...acc[parent.childId], { ...parent, active: false }] } : { ...acc, [parent.childId]: [{ ...parent, active: true }] };
-
-				if (newAcc[parent.childId][1]) {
-					newAcc[parent.childId][1].active = true;
-				}
+				const newAcc = acc[parent.childId] ? { ...acc, [parent.childId]: [...acc[parent.childId], parent] } : { ...acc, [parent.childId]: [parent] };
 
 				return newAcc;
 			}, {});
@@ -111,12 +107,14 @@ export const useTreeStore = defineStore("tree", {
 				}
 			}
 		},
-		setParentAsActive(level, childId, previousParentId, parentId) {
+		async setParentAsActive(level, childId, previousParentId, parentId) {
 			const indexPrev = this.tree[level][childId].findIndex((parent) => parent.id == previousParentId);
 			this.tree[level][childId][indexPrev].active = false;
 
 			const indexNew = this.tree[level][childId].findIndex((parent) => parent.id == parentId);
 			this.tree[level][childId][indexNew].active = true;
+
+			await api().patch(`/tree/active/${previousParentId}/${parentId}`);
 		},
 	},
 });
