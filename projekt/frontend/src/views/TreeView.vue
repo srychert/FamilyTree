@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, onUnmounted } from "vue";
 import { useTreeStore } from "@/stores/tree";
 import CreateTreeForm from "@/components/CreateTreeForm.vue";
 import Person from "@/components/Person.vue";
@@ -8,7 +8,7 @@ import Search from "@/components/Search.vue";
 
 const treeStore = useTreeStore();
 // 2*currentMaxLevel = number of parent nodes in column
-const currentMaxLevel = ref(4);
+const currentMaxLevel = ref(Object.keys(treeStore.tree).length || 4);
 const contextMenuRef = ref(null);
 
 onMounted(() => {
@@ -31,6 +31,11 @@ const handelMenuClick = (e, level, person) => {
 	const others = level != 0 ? treeStore.getOtherParents(level, person.childId, person.id) : [];
 	contextMenuRef.value.toggle(e, level, person, others);
 };
+
+onUnmounted(() => {
+	// I am not sure if user wants the tree to reset
+	// treeStore.tree = {};
+});
 </script>
 
 <template>

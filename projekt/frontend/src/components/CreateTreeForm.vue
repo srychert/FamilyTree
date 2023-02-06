@@ -17,6 +17,11 @@ const handleCreateTree = () => {
 			lastName: lastName.value,
 			dateOfBirth: dateOfBirth.value,
 		})
+		.then((_) => {
+			for (let i = 1; i < 4; i++) {
+				treeStore.tree[i] = {};
+			}
+		})
 		.catch((err) => {
 			console.error(err);
 			if (err.message) {
