@@ -5,6 +5,7 @@ export const useTreeStore = defineStore("tree", {
 	state: () => ({
 		owner: {},
 		tree: {},
+		trees: [],
 	}),
 
 	getters: {
@@ -60,8 +61,12 @@ export const useTreeStore = defineStore("tree", {
 			this.owner = owner;
 			this.tree[0] = [{ ...owner, active: true }];
 		},
+		async searchForTrees(name) {
+			const res = await api().get(`/tree`, { params: { name } });
+			this.trees = res.data;
+		},
 		async getOwner() {
-			const res = await api().get(`/tree`);
+			const res = await api().get(`/tree/owner`);
 			const owner = res.data;
 
 			this.owner = owner;
@@ -98,7 +103,12 @@ export const useTreeStore = defineStore("tree", {
 
 			if (res.status === 200) {
 				console.log("OK");
-				this.tree[level][childId] = this.tree[level][childId].filter((p) => p.id !== personId);
+				if (level == 0) {
+					this.owner = {};
+					this.tree = {};
+				} else {
+					this.tree[level][childId] = this.tree[level][childId].filter((p) => p.id !== personId);
+				}
 			}
 		},
 		setParentAsActive(level, childId, previousParentId, parentId) {

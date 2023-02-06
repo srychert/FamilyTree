@@ -14,8 +14,53 @@ function dateIsValid(dateStr) {
 	return d instanceof Date && isFinite(d);
 }
 
-// Get owner of tree
 router.get("/", hasRoles("ADMIN", "USER"), async (req, res) => {
+	const session = driver.session();
+	const login = req.user.login;
+	const { name } = req.query;
+
+	let response = [];
+	session
+		.run(
+			`MATCH (t: Tree)<-[:IN]-(p: Person)
+			WHERE t.owner <> $login
+			RETURN t, p`,
+			{
+				login,
+			}
+		)
+		.then((result) => {
+			result.records.forEach((record) => {
+				const personInDb = record.get("p");
+				const treeInDb = record.get("t");
+
+				const person = { ...personInDb.properties, id: personInDb.identity.low };
+				const tree = {
+					...treeInDb.properties,
+					id: treeInDb.identity.low,
+					person,
+				};
+
+				let dbName = `${person.firstName} ${person.lastName}`.toLocaleLowerCase();
+				searchName = name.toLocaleLowerCase();
+
+				if (dbName.includes(searchName) || dbName.split(" ").reverse().join(" ").includes(searchName)) {
+					response.push(tree);
+				}
+			});
+		})
+		.catch((error) => {
+			console.log(error);
+			return res.status(500).send(error);
+		})
+		.then(() => {
+			session.close();
+			return res.send(response);
+		});
+});
+
+// Get owner of tree
+router.get("/owner", hasRoles("ADMIN", "USER"), async (req, res) => {
 	const session = driver.session();
 	const login = req.user.login;
 
@@ -311,4 +356,3 @@ router.delete("/:personId", hasRoles("ADMIN", "USER"), async (req, res) => {
 });
 
 module.exports = router;
-	

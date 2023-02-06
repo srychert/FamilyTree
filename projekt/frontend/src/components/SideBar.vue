@@ -48,7 +48,7 @@ const goToProfile = () => router.push("/profile");
 
 	left: -300px;
 	transition: left ease-in 0.3s;
-	z-index: 1;
+	z-index: 998;
 }
 
 .sidebar.open {
@@ -70,8 +70,9 @@ const goToProfile = () => router.push("/profile");
 
 .burger {
 	position: absolute;
-	top: 1em;
-	left: 1em;
+	top: 1rem;
+	left: calc(2rem + 4px);
+	z-index: 999;
 }
 
 @media (min-width: 900px) {

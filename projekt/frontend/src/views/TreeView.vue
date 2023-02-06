@@ -4,6 +4,7 @@ import { useTreeStore } from "@/stores/tree";
 import CreateTreeForm from "@/components/CreateTreeForm.vue";
 import Person from "@/components/Person.vue";
 import ContextMenu from "@/components/ContextMenu.vue";
+import Search from "@/components/Search.vue";
 
 const treeStore = useTreeStore();
 // 2*currentMaxLevel = number of parent nodes in column
@@ -24,7 +25,11 @@ const handelLoadNextLevel = () => {
 	treeStore.getParents(treeStore.owner.id, currentMaxLevel.value).then((_) => (currentMaxLevel.value += 1));
 };
 
+const menuAvaible = ref(true);
+
 const handelMenuClick = (e, level, person) => {
+	if (!menuAvaible.value) return;
+
 	const others = level != 0 ? treeStore.getOtherParents(level, person.childId, person.id) : [];
 	contextMenuRef.value.toggle(e, level, person, others);
 };
@@ -33,26 +38,28 @@ const handelMenuClick = (e, level, person) => {
 <template>
 	<CreateTreeForm v-if="Object.keys(treeStore.owner).length === 0" />
 
-	<div v-else class="tree">
-		<div class="column" v-for="(parents, level) in treeStore.getActive" :style="`grid-template-rows: repeat(${2 ** Number.parseInt(level)}, minmax(0, 1fr))`">
-			<template v-for="person in parents">
-				<Person v-if="person?.active" :person="person" @click="(e) => handelMenuClick(e, level, person)" />
-				<Person v-else v-if="level != 0" :person="{}" />
-			</template>
-		</div>
-		<div class="column">
-			<button class="load-more material-symbols-outlined" @click="handelLoadNextLevel">add_circle</button>
+	<div v-else>
+		<Search :currentMaxLevel="currentMaxLevel" @selectTree="() => (menuAvaible = false)"></Search>
+		<div class="tree">
+			<div class="column" v-for="(parents, level) in treeStore.getActive" :style="`grid-template-rows: repeat(${2 ** Number.parseInt(level)}, minmax(0, 1fr))`">
+				<template v-for="person in parents">
+					<Person v-if="person?.active" :person="person" @click="(e) => handelMenuClick(e, level, person)" />
+					<Person v-else v-if="level != 0" :person="{}" />
+				</template>
+			</div>
+			<div class="column">
+				<button class="load-more material-symbols-outlined" @click="handelLoadNextLevel">add_circle</button>
+			</div>
 		</div>
 	</div>
 
-	<ContextMenu ref="contextMenuRef"></ContextMenu>
+	<ContextMenu v-if="menuAvaible" ref="contextMenuRef"></ContextMenu>
 </template>
 
 <style scoped>
 .tree {
-	/* height: calc(100% - 2px); */
-	height: calc(100vh - 42px);
-	padding: 4px;
+	height: calc(100vh - 82px);
+	padding: 5px;
 	display: grid;
 	grid-template-columns: repeat(v-bind(currentMaxLevel), minmax(200px, 1fr)) 0.5fr;
 
