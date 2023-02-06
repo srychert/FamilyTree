@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useTreeStore } from "@/stores/tree";
+import { useUserStore } from "@/stores/user";
 import MenuAside from "@/components/MenuAside.vue";
 import { RouterLink, useRouter } from "vue-router";
 
@@ -11,6 +12,7 @@ const props = defineProps({
 });
 
 const treeStore = useTreeStore();
+const userStore = useUserStore();
 
 const isOpen = ref(false);
 const clientX = ref("0px");
@@ -29,7 +31,7 @@ const items = computed(() => [
 			items: parents.value.map((p) => {
 				return {
 					content: `${p.firstName} ${p.lastName}\n${p.dateOfBirth}`,
-					args: [level.value, p.childId, person.value.id, p.id],
+					args: [level.value, p.childId, person.value.id, p.id, userStore.user.login === treeStore.owner.login],
 				};
 			}),
 			action: (args) => {

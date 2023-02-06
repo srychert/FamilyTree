@@ -107,14 +107,14 @@ export const useTreeStore = defineStore("tree", {
 				}
 			}
 		},
-		async setParentAsActive(level, childId, previousParentId, parentId) {
+		async setParentAsActive(level, childId, previousParentId, parentId, callApi) {
 			const indexPrev = this.tree[level][childId].findIndex((parent) => parent.id == previousParentId);
 			this.tree[level][childId][indexPrev].active = false;
 
 			const indexNew = this.tree[level][childId].findIndex((parent) => parent.id == parentId);
 			this.tree[level][childId][indexNew].active = true;
 
-			await api().patch(`/tree/active/${previousParentId}/${parentId}`);
+			if (callApi) await api().patch(`/tree/active/${previousParentId}/${parentId}`);
 		},
 	},
 });
