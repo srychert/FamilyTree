@@ -25,11 +25,9 @@ const handelLoadNextLevel = () => {
 	treeStore.getParents(treeStore.owner.id, currentMaxLevel.value).then((_) => (currentMaxLevel.value += 1));
 };
 
-const menuAvaible = ref(true);
+const ownerMenu = ref(true);
 
 const handelMenuClick = (e, level, person) => {
-	if (!menuAvaible.value) return;
-
 	const others = level != 0 ? treeStore.getOtherParents(level, person.childId, person.id) : [];
 	contextMenuRef.value.toggle(e, level, person, others);
 };
@@ -39,7 +37,7 @@ const handelMenuClick = (e, level, person) => {
 	<CreateTreeForm v-if="Object.keys(treeStore.owner).length === 0" />
 
 	<div v-else>
-		<Search :currentMaxLevel="currentMaxLevel" @selectTree="() => (menuAvaible = false)"></Search>
+		<Search :currentMaxLevel="currentMaxLevel" @selectTree="() => (ownerMenu = false)"></Search>
 		<div class="tree">
 			<div class="column" v-for="(parents, level) in treeStore.getActive" :style="`grid-template-rows: repeat(${2 ** Number.parseInt(level)}, minmax(0, 1fr))`">
 				<template v-for="person in parents">
@@ -53,7 +51,7 @@ const handelMenuClick = (e, level, person) => {
 		</div>
 	</div>
 
-	<ContextMenu v-if="menuAvaible" ref="contextMenuRef"></ContextMenu>
+	<ContextMenu :ownerMenu="ownerMenu" ref="contextMenuRef"></ContextMenu>
 </template>
 
 <style scoped>

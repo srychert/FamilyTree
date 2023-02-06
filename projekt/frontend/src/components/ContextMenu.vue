@@ -6,6 +6,10 @@ import { RouterLink, useRouter } from "vue-router";
 
 const router = useRouter();
 
+const props = defineProps({
+	ownerMenu: Boolean,
+});
+
 const treeStore = useTreeStore();
 
 const isOpen = ref(false);
@@ -18,38 +22,36 @@ const person = ref({});
 const parents = ref([]);
 
 const items = computed(() => [
-	level.value != 0
-		? {
-				content: "Change person",
-				action: () => {},
-				aside: {
-					items: parents.value.map((p) => {
-						return {
-							content: `${p.firstName} ${p.lastName}\n${p.dateOfBirth}`,
-							args: [level.value, p.childId, person.value.id, p.id],
-						};
-					}),
-					action: (args) => {
-						// level, childId, previousParentId, parentId
-						treeStore.setParentAsActive(...args);
-						isOpen.value = false;
-					},
-				},
-		  }
-		: null,
-	{
+	level.value != 0 && {
+		content: "Change person",
+		action: () => {},
+		aside: {
+			items: parents.value.map((p) => {
+				return {
+					content: `${p.firstName} ${p.lastName}\n${p.dateOfBirth}`,
+					args: [level.value, p.childId, person.value.id, p.id],
+				};
+			}),
+			action: (args) => {
+				// level, childId, previousParentId, parentId
+				treeStore.setParentAsActive(...args);
+				isOpen.value = false;
+			},
+		},
+	},
+	props.ownerMenu && {
 		content: "Add parent",
 		action: () => {
 			router.push({ name: "add-parent", query: { childId: person.value.id, level: level.value } });
 		},
 	},
-	{
+	props.ownerMenu && {
 		content: "Edit",
 		action: () => {
 			router.push({ name: "edit-person", query: { personId: person.value.id, level: level.value } });
 		},
 	},
-	{
+	props.ownerMenu && {
 		content: "Delete",
 		action: () => {
 			treeStore.deletePerson(level.value, person.value.childId, person.value.id).then((_) => (isOpen.value = false));
