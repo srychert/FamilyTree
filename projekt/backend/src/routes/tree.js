@@ -92,9 +92,9 @@ router.get("/owner", hasRoles("ADMIN", "USER"), async (req, res) => {
 router.post("/", hasRoles("ADMIN", "USER"), async (req, res) => {
 	const session = driver.session();
 
-	const { firstName, lastName, dateOfBirth } = req.body;
+	const { firstName, lastName, dateOfBirth, gender } = req.body;
 
-	const emptyFields = Object.entries({ firstName, lastName, dateOfBirth })
+	const emptyFields = Object.entries({ firstName, lastName, dateOfBirth, gender })
 		.filter(([_, v]) => v === undefined)
 		.map(([k, _]) => k);
 
@@ -115,7 +115,7 @@ router.post("/", hasRoles("ADMIN", "USER"), async (req, res) => {
             ON CREATE
                 SET 
                     t.owner = $owner 
-                    MERGE (t)<-[:IN]-(p:Person {login: $owner, active: true, firstName: $firstName, lastName: $lastName, dateOfBirth: $dateOfBirth})
+                    MERGE (t)<-[:IN]-(p:Person {login: $owner, active: true, firstName: $firstName, lastName: $lastName, dateOfBirth: $dateOfBirth, gender: $gender})
             RETURN p`,
 			{
 				treeName: `${login}-tree`,
@@ -123,6 +123,7 @@ router.post("/", hasRoles("ADMIN", "USER"), async (req, res) => {
 				firstName,
 				lastName,
 				dateOfBirth,
+				gender,
 			}
 		)
 		.then((result) => {
@@ -229,9 +230,9 @@ router.post("/:childId", hasRoles("ADMIN", "USER"), async (req, res) => {
 		return res.status(400).send("'childId' must be an Integer");
 	}
 
-	const { firstName, lastName, dateOfBirth } = req.body;
+	const { firstName, lastName, dateOfBirth, gender } = req.body;
 
-	const emptyFields = Object.entries({ firstName, lastName, dateOfBirth })
+	const emptyFields = Object.entries({ firstName, lastName, dateOfBirth, gender })
 		.filter(([_, v]) => v === undefined)
 		.map(([k, _]) => k);
 
@@ -248,7 +249,7 @@ router.post("/:childId", hasRoles("ADMIN", "USER"), async (req, res) => {
 		.run(
 			`MATCH (child:Person)
 			WHERE ID(child) = $childId
-			MERGE (p:Person {firstName: $firstName, lastName: $lastName, dateOfBirth: $dateOfBirth})
+			MERGE (p:Person {firstName: $firstName, lastName: $lastName, dateOfBirth: $dateOfBirth, gender: $gender})
 			ON CREATE
 				SET p += {childId: $childId, active: false}
 			ON MATCH
@@ -260,6 +261,7 @@ router.post("/:childId", hasRoles("ADMIN", "USER"), async (req, res) => {
 				firstName,
 				lastName,
 				dateOfBirth,
+				gender,
 			}
 		)
 		.then((result) => {
@@ -276,16 +278,17 @@ router.post("/:childId", hasRoles("ADMIN", "USER"), async (req, res) => {
 
 			session
 				.run(
-					`MATCH (child:Person)<-[:PARENT]-(p:Person {active: true})
+					`MATCH (child:Person)<-[:PARENT]-(p:Person {active: true, gender: $gender})
 					WHERE ID(child) = $childId
 					WITH COUNT(*) AS active_parents
 					MATCH (p:Person)
-					WHERE ID(p) = $personId AND active_parents < 2
+					WHERE ID(p) = $personId AND active_parents < 1
 					SET p.active = true
 					RETURN p`,
 					{
 						childId,
 						personId: person.id,
+						gender,
 					}
 				)
 				.then((r) => {
@@ -321,9 +324,9 @@ router.patch("/:personId", hasRoles("ADMIN", "USER"), async (req, res) => {
 		return res.status(400).send("'personId' must be an Integer");
 	}
 
-	const { firstName, lastName, dateOfBirth } = req.body;
+	const { firstName, lastName, dateOfBirth, gender } = req.body;
 
-	const emptyFields = Object.entries({ firstName, lastName, dateOfBirth })
+	const emptyFields = Object.entries({ firstName, lastName, dateOfBirth, gender })
 		.filter(([_, v]) => v === undefined)
 		.map(([k, _]) => k);
 
@@ -342,12 +345,14 @@ router.patch("/:personId", hasRoles("ADMIN", "USER"), async (req, res) => {
 			SET p.firstName = $firstName
 			SET p.lastName = $lastName
 			SET p.dateOfBirth = $dateOfBirth
+			SET p.gender = $gender
 			RETURN p`,
 			{
 				personId,
 				firstName,
 				lastName,
 				dateOfBirth,
+				gender,
 			}
 		)
 		.catch((error) => {
@@ -365,15 +370,13 @@ router.patch("/active/:prevParentId/:parentId", hasRoles("ADMIN", "USER"), async
 	const prevParentId = parseInt(req.params.prevParentId);
 	const parentId = parseInt(req.params.parentId);
 
-	console.log(prevParentId, parentId);
-
 	if (isNaN(prevParentId) || isNaN(parentId)) {
 		return res.status(400).send("'prevParentId' and 'parentId' must be an Integer");
 	}
 
 	session
 		.run(
-			`MATCH (previous:Person {active: true})
+			`OPTIONAL MATCH (previous:Person {active: true})
 			WHERE ID(previous) = $prevParentId
 			SET previous.active = false
 			WITH previous

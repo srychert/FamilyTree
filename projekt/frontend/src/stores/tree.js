@@ -28,6 +28,12 @@ export const useTreeStore = defineStore("tree", {
 					// get active parents
 					const parents = state.tree[level][childId] ? state.tree[level][childId].filter((p) => p.active) : [];
 
+					if (parents.length === 1) {
+						parents[0].gender === "male" ? parents.push(null) : parents.unshift(null);
+					} else {
+						parents.sort((p, _) => (p?.gender === "male" ? -1 : 1));
+					}
+
 					// add active parents or undefined to currentParents array at calculated positions
 					for (let i = 0; i < 2; i++) {
 						const pos = position * 2 + i;
@@ -48,7 +54,8 @@ export const useTreeStore = defineStore("tree", {
 
 		getOtherParents(state) {
 			return (level, childId, parentId) => {
-				return state.tree[level][childId].filter((p) => p.id !== parentId && !p.active);
+				const currentGender = state.tree[level][childId].find((p) => p.id === parentId)?.gender;
+				return state.tree[level][childId].filter((p) => p.id !== parentId && !p.active && p.gender === currentGender);
 			};
 		},
 	},
@@ -94,25 +101,37 @@ export const useTreeStore = defineStore("tree", {
 		async editPerson(personId, person) {
 			await api().patch(`/tree/${personId}`, person);
 		},
-		async deletePerson(level, childId, personId) {
-			const res = await api().delete(`/tree/${personId}`);
+		async deletePerson(level, childId, person) {
+			const res = await api().delete(`/tree/${person.id}`);
 
-			if (res.status === 200) {
-				console.log("OK");
-				if (level == 0) {
-					this.owner = {};
-					this.tree = {};
-				} else {
-					this.tree[level][childId] = this.tree[level][childId].filter((p) => p.id !== personId);
-				}
+			if (res.status !== 200) {
+				return;
+			}
+
+			console.log("OK");
+
+			if (level == 0) {
+				this.owner = {};
+				this.tree = {};
+				return;
+			}
+
+			this.tree[level][childId] = this.tree[level][childId].filter((p) => p.id !== person.id);
+
+			const newActivePerson = this.tree[level][childId].find((p) => p.gender === person.gender && !p.active);
+
+			if (newActivePerson) {
+				this.setParentAsActive(level, childId, person.id, newActivePerson.id, true);
 			}
 		},
 		async setParentAsActive(level, childId, previousParentId, parentId, callApi) {
 			const indexPrev = this.tree[level][childId].findIndex((parent) => parent.id == previousParentId);
-			this.tree[level][childId][indexPrev].active = false;
+			const parents = this.tree[level][childId];
+
+			if (parents[indexPrev]) parents[indexPrev].active = false;
 
 			const indexNew = this.tree[level][childId].findIndex((parent) => parent.id == parentId);
-			this.tree[level][childId][indexNew].active = true;
+			if (parents[indexNew]) parents[indexNew].active = true;
 
 			if (callApi) await api().patch(`/tree/active/${previousParentId}/${parentId}`);
 		},

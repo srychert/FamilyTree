@@ -56,7 +56,7 @@ const items = computed(() => [
 	props.ownerMenu && {
 		content: "Delete",
 		action: () => {
-			treeStore.deletePerson(level.value, person.value.childId, person.value.id).then((_) => (isOpen.value = false));
+			treeStore.deletePerson(level.value, person.value.childId, person.value).then((_) => (isOpen.value = false));
 		},
 	},
 ]);

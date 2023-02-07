@@ -8,6 +8,7 @@ const treeStore = useTreeStore();
 const firstName = ref("");
 const lastName = ref("");
 const dateOfBirth = ref("");
+const gender = ref("male");
 const errorText = ref("");
 
 const handleCreateTree = () => {
@@ -16,6 +17,7 @@ const handleCreateTree = () => {
 			firstName: firstName.value,
 			lastName: lastName.value,
 			dateOfBirth: dateOfBirth.value,
+			gender: gender.value,
 		})
 		.then((_) => {
 			for (let i = 1; i < 4; i++) {
@@ -32,7 +34,7 @@ const handleCreateTree = () => {
 </script>
 
 <template>
-	<PersonForm v-model:firstName="firstName" v-model:lastName="lastName" v-model:dateOfBirth="dateOfBirth" v-model:handelSubmit="handleCreateTree" inputText="Create tree" :errorText="errorText"></PersonForm>
+	<PersonForm v-model:firstName="firstName" v-model:lastName="lastName" v-model:dateOfBirth="dateOfBirth" v-model:gender="gender" v-model:handelSubmit="handleCreateTree" inputText="Create tree" :errorText="errorText"></PersonForm>
 </template>
 
 <style scoped></style>

@@ -12,6 +12,7 @@ const treeStore = useTreeStore();
 const firstName = ref("");
 const lastName = ref("");
 const dateOfBirth = ref("");
+const gender = ref("male");
 const errorText = ref("");
 
 onMounted(() => {
@@ -19,6 +20,7 @@ onMounted(() => {
 		firstName.value = p.firstName;
 		lastName.value = p.lastName;
 		dateOfBirth.value = p.dateOfBirth;
+		gender.value = p.gender;
 	});
 });
 
@@ -28,6 +30,7 @@ const handelEditParent = () => {
 			firstName: firstName.value,
 			lastName: lastName.value,
 			dateOfBirth: dateOfBirth.value,
+			gender: gender.value,
 		})
 		.then((_) => {
 			router.push("/tree");
@@ -43,7 +46,7 @@ const handelEditParent = () => {
 
 <template>
 	<h1>Edit parent</h1>
-	<PersonForm v-model:firstName="firstName" v-model:lastName="lastName" v-model:dateOfBirth="dateOfBirth" v-model:handelSubmit="handelEditParent" inputText="Edit" :errorText="errorText"></PersonForm>
+	<PersonForm v-model:firstName="firstName" v-model:lastName="lastName" v-model:dateOfBirth="dateOfBirth" v-model:gender="gender" v-model:handelSubmit="handelEditParent" inputText="Edit" :errorText="errorText"></PersonForm>
 </template>
 
 <style scoped></style>
