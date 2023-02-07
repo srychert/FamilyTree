@@ -11,10 +11,12 @@ const treeStore = useTreeStore();
 const userStore = useUserStore();
 
 const name = ref("");
+const showNoResults = ref(false);
 let timer = undefined;
 
 const handelSearch = () => {
 	clearTimeout(timer);
+	showNoResults.value = false;
 
 	if (name.value === "") {
 		treeStore.trees = [];
@@ -22,7 +24,7 @@ const handelSearch = () => {
 	}
 
 	timer = setTimeout(() => {
-		treeStore.searchForTrees(name.value);
+		treeStore.searchForTrees(name.value).then((_) => (showNoResults.value = true));
 	}, 500);
 };
 
@@ -58,6 +60,7 @@ onUnmounted(() => {
 		</div>
 
 		<div v-if="name !== ''" class="trees">
+			<div v-if="treeStore.trees.length === 0 && showNoResults" class="tree-owner">No results</div>
 			<div class="tree-owner" v-for="tree in treeStore.trees" @click="showTree(tree)">
 				<div>{{ tree.person.firstName }} {{ tree.person.lastName }}</div>
 				<div>{{ tree.person.dateOfBirth }}</div>
@@ -118,6 +121,10 @@ button {
 	.actions {
 		grid-template-columns: 1fr;
 		grid-template-rows: 1fr 1fr;
+	}
+
+	input {
+		grid-row: 2;
 	}
 
 	button {
