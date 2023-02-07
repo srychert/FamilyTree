@@ -7,8 +7,8 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 const userStore = useUserStore();
-const isOpen = ref(true);
-const spanBackground = ref("var(--dark)");
+const isOpen = ref(window.innerWidth > 900);
+const spanBackground = ref(window.innerWidth > 900 ? "var(--dark)" : "var(--light)");
 
 const handleToggleNav = (e) => {
 	isOpen.value = e;

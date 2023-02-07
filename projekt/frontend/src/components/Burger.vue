@@ -9,7 +9,7 @@ defineProps({
 });
 
 const emit = defineEmits(["toggleOpen"]);
-const isOpen = ref(true);
+const isOpen = ref(window.innerWidth > 900);
 
 const handelClick = () => {
 	isOpen.value = !isOpen.value;
