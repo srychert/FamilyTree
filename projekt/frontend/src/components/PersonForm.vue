@@ -17,7 +17,6 @@ const checked = ref(true);
 
 const genderCopy = computed(() => props.gender);
 watch(genderCopy, (newG, _) => {
-	console.log(newG);
 	checked.value = newG === "male";
 });
 

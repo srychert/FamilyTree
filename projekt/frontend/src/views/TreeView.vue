@@ -25,9 +25,15 @@ const handelLoadNextLevel = () => {
 	treeStore.getParents(treeStore.owner.id, currentMaxLevel.value).then((_) => (currentMaxLevel.value += 1));
 };
 
+const copyMode = ref(false);
 const ownerMenu = ref(true);
 
-const handelMenuClick = (e, level, person) => {
+const handelPersonClick = (e, level, person) => {
+	if (copyMode.value) {
+		treeStore.toggleCopy(person);
+		return;
+	}
+
 	const others = level != 0 ? treeStore.getOtherParents(level, person.childId, person.id) : [];
 	contextMenuRef.value.toggle(e, level, person, others);
 };
@@ -35,6 +41,8 @@ const handelMenuClick = (e, level, person) => {
 onUnmounted(() => {
 	// I am not sure if user wants the tree to reset
 	// treeStore.tree = {};
+
+	treeStore.copy = [];
 });
 </script>
 
@@ -42,11 +50,11 @@ onUnmounted(() => {
 	<CreateTreeForm v-if="Object.keys(treeStore.owner).length === 0" />
 
 	<div v-else>
-		<Search :currentMaxLevel="currentMaxLevel" @selectTree="() => (ownerMenu = false)"></Search>
+		<Search :currentMaxLevel="currentMaxLevel" v-model:copyMode="copyMode" @selectTree="() => (ownerMenu = false)"></Search>
 		<div class="tree">
 			<div class="column" v-for="(parents, level) in treeStore.getActive" :style="`grid-template-rows: repeat(${2 ** Number.parseInt(level)}, minmax(0, 1fr))`">
 				<template v-for="person in parents">
-					<Person v-if="person?.active" :person="person" @click="(e) => handelMenuClick(e, level, person)" />
+					<Person v-if="person?.active" :person="person" @click="(e) => handelPersonClick(e, level, person)" :class="{ 'to-copy': treeStore.copy.includes(person) }" />
 					<Person v-else v-if="level != 0" :person="{}" />
 				</template>
 			</div>
@@ -93,5 +101,9 @@ onUnmounted(() => {
 	cursor: pointer;
 	color: var(--dark);
 	background-color: var(--light);
+}
+
+.to-copy {
+	background-color: black;
 }
 </style>

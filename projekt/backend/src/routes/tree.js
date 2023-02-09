@@ -249,11 +249,7 @@ router.post("/:childId", hasRoles("ADMIN", "USER"), async (req, res) => {
 		.run(
 			`MATCH (child:Person)
 			WHERE ID(child) = $childId
-			MERGE (p:Person {firstName: $firstName, lastName: $lastName, dateOfBirth: $dateOfBirth, gender: $gender})
-			ON CREATE
-				SET p += {childId: $childId, active: false}
-			ON MATCH
-  				SET p.childId = $childId
+			MERGE (p:Person {firstName: $firstName, lastName: $lastName, dateOfBirth: $dateOfBirth, gender: $gender, childId: $childId, active: false})
 			MERGE (p)-[:PARENT]->(child)
 			RETURN p`,
 			{
@@ -411,6 +407,9 @@ router.delete("/:personId", hasRoles("ADMIN", "USER"), async (req, res) => {
 		.run(
 			`MATCH (p:Person)
 			WHERE ID(p) = $personId
+			WITH p
+			OPTIONAL MATCH (parent:Person)-[:PARENT*1..]->(p)
+			DETACH DELETE parent
 			DETACH DELETE p`,
 			{
 				personId,
@@ -423,6 +422,128 @@ router.delete("/:personId", hasRoles("ADMIN", "USER"), async (req, res) => {
 		.then(() => {
 			session.close();
 			return res.sendStatus(200);
+		});
+});
+
+router.patch("/copy/:childId/:parentId", hasRoles("ADMIN", "USER"), async (req, res) => {
+	const session = driver.session();
+	const childId = parseInt(req.params.childId);
+	const parentId = parseInt(req.params.parentId);
+
+	const { parents } = req.body;
+
+	if (isNaN(childId) || isNaN(parentId)) {
+		return res.status(400).send("'childId' and 'parentId' must be an Integer");
+	}
+
+	let response = [];
+
+	session
+		.run(
+			`MATCH (child:Person)
+			WHERE ID(child) = $childId
+			WITH child
+			MATCH (p:Person)
+			WHERE ID(p) = $parentId
+			WITH child, p
+			MERGE (parentRoot:Person {childId: $childId, active: false, firstName: p.firstName, lastName: p.lastName, dateOfBirth: p.dateOfBirth, gender: p.gender})-[:PARENT]->(child)
+			WITH parentRoot
+			UNWIND $parents AS parent
+			MERGE (parentCopy:Person {copy: true, firstName: parent.firstName, lastName: parent.lastName, dateOfBirth: parent.dateOfBirth, gender: parent.gender, active: parent.active})
+			RETURN parentRoot, parentCopy
+		`,
+			{
+				childId,
+				parentId,
+				parents,
+			}
+		)
+		.then((result) => {
+			let persons = [];
+			let parentRoot = {};
+			result.records.forEach((record) => {
+				parentRoot = record.get("parentRoot");
+				parentRoot = {
+					...parentRoot.properties,
+					id: parentRoot.identity.low,
+				};
+				let person = record.get("parentCopy");
+				person = {
+					...person.properties,
+					id: person.identity.low,
+				};
+
+				persons.push(person);
+			});
+
+			response.push(parentRoot);
+
+			persons[0] = { ...persons[0], childId: parentRoot.id };
+
+			const personsWithChilds = persons.reduce((acc, curr, index) => {
+				if (index === 0) {
+					acc.push(curr);
+					return acc;
+				}
+
+				curr.childId = acc[index - 1].id;
+				acc.push(curr);
+
+				return acc;
+			}, []);
+
+			console.log(parentRoot);
+			console.log(personsWithChilds);
+
+			session
+				.run(
+					`MATCH (child:Person)<-[:PARENT]-(p:Person {active: true, gender: $prGender})
+					WHERE ID(child) = $childId
+					WITH COUNT(p) AS active_parents
+					OPTIONAL MATCH (pR:Person)
+					WHERE ID(pR) = $prId AND active_parents < 1
+					SET pR.active = true
+					WITH pR
+					UNWIND $personsWithChilds AS parent
+						MATCH (p:Person)
+						WHERE ID(p) = parent.id
+						REMOVE p.copy
+						SET p.childId = parent.childId
+						WITH p
+						MATCH (child:Person)
+						WHERE ID(child) = p.childId
+						MERGE (p)-[:PARENT]->(child)
+						RETURN p`,
+					{
+						childId,
+						personsWithChilds,
+						prId: parentRoot.id,
+						prGender: parentRoot.gender,
+					}
+				)
+				.then((r) => {
+					r.records.forEach((recordInner) => {
+						let updatedPerson = recordInner.get("p");
+
+						updatedPerson = {
+							...updatedPerson.properties,
+							id: updatedPerson.identity.low,
+						};
+						response.push(updatedPerson);
+					});
+				})
+				.catch((error) => {
+					console.log(error);
+					return res.status(500).send(error);
+				})
+				.then(() => {
+					session.close();
+					return res.send(response);
+				});
+		})
+		.catch((error) => {
+			console.log(error);
+			return res.status(500).send(error);
 		});
 });
 

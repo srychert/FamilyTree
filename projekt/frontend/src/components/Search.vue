@@ -5,6 +5,7 @@ import { useUserStore } from "@/stores/user";
 
 const props = defineProps({
 	currentMaxLevel: Number,
+	copyMode: Boolean,
 });
 
 const treeStore = useTreeStore();
@@ -28,7 +29,7 @@ const handelSearch = () => {
 	}, 500);
 };
 
-const emit = defineEmits(["selectTree"]);
+const emit = defineEmits(["selectTree", "update:copyMode"]);
 const selectedTree = ref(null);
 
 const showTree = (tree) => {
@@ -44,6 +45,26 @@ const showTree = (tree) => {
 	name.value = "";
 };
 
+const handelCopy = () => {
+	emit("update:copyMode", true);
+};
+
+const handelCopyCancel = () => {
+	emit("update:copyMode", false);
+	treeStore.copy = [];
+};
+
+const handelCopyConfirm = () => {
+	emit("update:copyMode", false);
+	treeStore.getOwner().then((_) => {
+		if (treeStore.owner.id !== undefined) {
+			for (let i = 1; i < props.currentMaxLevel; i++) {
+				treeStore.getParents(treeStore.owner.id, i);
+			}
+		}
+	});
+};
+
 onUnmounted(() => {
 	treeStore.trees = [];
 });
@@ -53,10 +74,14 @@ onUnmounted(() => {
 	<div class="search">
 		<div class="actions">
 			<input v-model="name" type="text" @input="handelSearch" />
-			<button v-if="selectedTree && userStore.user.login !== selectedTree?.person?.login">
+			<button v-if="selectedTree && userStore.user.login !== selectedTree?.person?.login && !copyMode" @click="handelCopy">
 				<span>Copy</span>
 				<span class="material-symbols-outlined"> content_copy </span>
 			</button>
+			<div v-if="copyMode" class="copy-buttons">
+				<button @click="handelCopyConfirm">OK</button>
+				<button @click="handelCopyCancel">Cancel</button>
+			</div>
 		</div>
 
 		<div v-if="name !== ''" class="trees">
@@ -94,6 +119,11 @@ button {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+}
+
+.copy-buttons {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
 }
 
 .trees {

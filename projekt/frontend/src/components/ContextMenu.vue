@@ -59,6 +59,17 @@ const items = computed(() => [
 			treeStore.deletePerson(level.value, person.value.childId, person.value).then((_) => (isOpen.value = false));
 		},
 	},
+	treeStore.copy.length > 0 && {
+		content: "Add copy there",
+		action: async () => {
+			console.log("Coping: ", treeStore.copy);
+			isOpen.value = false;
+			treeStore.doCopy(person.value.id, treeStore.copy[0].id, treeStore.copy.slice(1)).then((_) => {
+				treeStore.copy = [];
+				router.go();
+			});
+		},
+	},
 ]);
 
 const toggle = (e, treeLevel, parent, otherParents) => {

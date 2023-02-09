@@ -6,6 +6,7 @@ export const useTreeStore = defineStore("tree", {
 		owner: {},
 		tree: {},
 		trees: [],
+		copy: [],
 	}),
 
 	getters: {
@@ -134,6 +135,21 @@ export const useTreeStore = defineStore("tree", {
 			if (parents[indexNew]) parents[indexNew].active = true;
 
 			if (callApi) await api().patch(`/tree/active/${previousParentId}/${parentId}`);
+		},
+		toggleCopy(person) {
+			const index = this.copy.indexOf(person);
+
+			if (index > -1) {
+				this.copy.splice(index, 1);
+				return;
+			}
+
+			this.copy.push(person);
+		},
+		async doCopy(childId, parentId, parents) {
+			const res = await api().patch(`/tree/copy/${childId}/${parentId}`, { parents }, { timeout: 3000 });
+
+			console.log(res);
 		},
 	},
 });
