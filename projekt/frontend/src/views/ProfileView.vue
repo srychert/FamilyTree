@@ -15,12 +15,12 @@ const othersColor = ref(isNaN(othersColorCookie) ? 0 : othersColorCookie);
 
 const updateUserColor = (newColor) => {
 	userColor.value = newColor;
-	Cookies.set("userColor", newColor);
+	Cookies.set("userColor", newColor, { expires: 365 });
 };
 
 const updateOthersColor = (newColor) => {
 	othersColor.value = newColor;
-	Cookies.set("othersColor", newColor);
+	Cookies.set("othersColor", newColor, { expires: 365 });
 };
 </script>
 
