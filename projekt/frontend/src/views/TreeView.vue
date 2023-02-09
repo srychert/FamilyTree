@@ -30,7 +30,7 @@ const ownerMenu = ref(true);
 
 const handelPersonClick = (e, level, person) => {
 	if (copyMode.value) {
-		treeStore.toggleCopy(person);
+		treeStore.toggleCopy(level, person);
 		return;
 	}
 
@@ -54,7 +54,7 @@ onUnmounted(() => {
 		<div class="tree">
 			<div class="column" v-for="(parents, level) in treeStore.getActive" :style="`grid-template-rows: repeat(${2 ** Number.parseInt(level)}, minmax(0, 1fr))`">
 				<template v-for="person in parents">
-					<Person v-if="person?.active" :person="person" @click="(e) => handelPersonClick(e, level, person)" :class="{ 'to-copy': treeStore.copy.includes(person) }" />
+					<Person v-if="person?.active" :person="person" @click="(e) => handelPersonClick(e, level, person)" :class="{ 'to-copy': treeStore.copy.find((p) => p.id === person.id) }" />
 					<Person v-else v-if="level != 0" :person="{}" />
 				</template>
 			</div>

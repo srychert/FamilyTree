@@ -136,20 +136,33 @@ export const useTreeStore = defineStore("tree", {
 
 			if (callApi) await api().patch(`/tree/active/${previousParentId}/${parentId}`);
 		},
-		toggleCopy(person) {
-			const index = this.copy.indexOf(person);
+		toggleCopy(level, person) {
+			console.log(level, person);
+			const pLevel = parseInt(level);
+			const nPerson = { ...person, level: pLevel };
+			const index = this.copy.map((p) => p.id).indexOf(person.id);
 
 			if (index > -1) {
 				this.copy.splice(index, 1);
 				return;
 			}
 
-			this.copy.push(person);
+			if (this.copy.length === 0) {
+				this.copy.push(nPerson);
+				return;
+			}
+
+			if (this.copy.some((p) => p.level === nPerson.level)) return;
+
+			if (nPerson.level < this.copy[0].level) {
+				this.copy.unshift(nPerson);
+				return;
+			}
+
+			this.copy.push(nPerson);
 		},
 		async doCopy(childId, parentId, parents) {
 			const res = await api().patch(`/tree/copy/${childId}/${parentId}`, { parents }, { timeout: 3000 });
-
-			console.log(res);
 		},
 	},
 });

@@ -492,9 +492,6 @@ router.patch("/copy/:childId/:parentId", hasRoles("ADMIN", "USER"), async (req, 
 				return acc;
 			}, []);
 
-			console.log(parentRoot);
-			console.log(personsWithChilds);
-
 			session
 				.run(
 					`MATCH (child:Person)<-[:PARENT]-(p:Person {active: true, gender: $prGender})
