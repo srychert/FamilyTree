@@ -137,12 +137,11 @@ export const useTreeStore = defineStore("tree", {
 			if (callApi) await api().patch(`/tree/active/${previousParentId}/${parentId}`);
 		},
 		toggleCopy(level, person) {
-			console.log(level, person);
 			const pLevel = parseInt(level);
 			const nPerson = { ...person, level: pLevel };
 			const index = this.copy.map((p) => p.id).indexOf(person.id);
 
-			if (index > -1) {
+			if (index > -1 && this.copy[index + 1] === undefined) {
 				this.copy.splice(index, 1);
 				return;
 			}
@@ -154,12 +153,14 @@ export const useTreeStore = defineStore("tree", {
 
 			if (this.copy.some((p) => p.level === nPerson.level)) return;
 
-			if (nPerson.level < this.copy[0].level) {
+			if (nPerson.level === this.copy[0].level - 1) {
 				this.copy.unshift(nPerson);
 				return;
 			}
 
-			this.copy.push(nPerson);
+			if (nPerson.level - 1 === this.copy[this.copy.length - 1].level) {
+				this.copy.push(nPerson);
+			}
 		},
 		async doCopy(childId, parentId, parents) {
 			const res = await api().patch(`/tree/copy/${childId}/${parentId}`, { parents }, { timeout: 3000 });
